@@ -72,13 +72,13 @@ export const VenueDetail: React.FC = () => {
 
   const fetchVenueImages = async () => {
     try {
-      // 模拟场馆图片数据
+      // 模拟场馆图片数据 - 使用Unsplash图片
       const mockImages: CourtImage[] = [
         {
           id: '1',
           courtId: venueId!,
-          url: 'https://images.pexels.com/photos/1263349/pexels-photo-1263349.jpeg?auto=compress&cs=tinysrgb&w=800',
-          filename: 'venue-exterior.jpg',
+          url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '场馆外观全景.jpg',
           size: 1024000,
           uploadedAt: '2024-01-01T00:00:00.000Z',
           isMain: true,
@@ -86,18 +86,42 @@ export const VenueDetail: React.FC = () => {
         {
           id: '2',
           courtId: venueId!,
-          url: 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
-          filename: 'venue-interior.jpg',
+          url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '场馆内部视角.jpg',
           size: 2048000,
           uploadedAt: '2024-01-02T00:00:00.000Z',
         },
         {
           id: '3',
           courtId: venueId!,
-          url: 'https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg?auto=compress&cs=tinysrgb&w=800',
-          filename: 'venue-aerial.jpg',
+          url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '航拍俯视图.jpg',
           size: 1500000,
           uploadedAt: '2024-01-03T00:00:00.000Z',
+        },
+        {
+          id: '4',
+          courtId: venueId!,
+          url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '观众席视角.jpg',
+          size: 1800000,
+          uploadedAt: '2024-01-04T00:00:00.000Z',
+        },
+        {
+          id: '5',
+          courtId: venueId!,
+          url: 'https://images.unsplash.com/photo-1587385789097-0197a7fbd179?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '夜景照明效果.jpg',
+          size: 2200000,
+          uploadedAt: '2024-01-05T00:00:00.000Z',
+        },
+        {
+          id: '6',
+          courtId: venueId!,
+          url: 'https://images.unsplash.com/photo-1606150674109-0a50c19b5c37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
+          filename: '比赛现场氛围.jpg',
+          size: 1600000,
+          uploadedAt: '2024-01-06T00:00:00.000Z',
         },
       ];
       setImages(mockImages);
@@ -109,11 +133,20 @@ export const VenueDetail: React.FC = () => {
   const handleUpload = async (file: File) => {
     setUploading(true);
     try {
-      // 模拟上传
+      // 模拟上传 - 使用Unsplash随机图片
+      const randomImageUrls = [
+        'https://images.unsplash.com/photo-1544919982-b61976f0ba43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      ];
+      const randomUrl = randomImageUrls[Math.floor(Math.random() * randomImageUrls.length)];
+      
       const newImage: CourtImage = {
         id: Date.now().toString(),
         courtId: venueId!,
-        url: URL.createObjectURL(file),
+        url: randomUrl,
         filename: file.name,
         size: file.size,
         uploadedAt: new Date().toISOString(),
@@ -130,14 +163,25 @@ export const VenueDetail: React.FC = () => {
   const handleBulkUpload = async (files: File[]) => {
     setUploading(true);
     try {
-      const newImages: CourtImage[] = files.map(file => ({
-        id: Date.now().toString() + Math.random().toString(),
+      // 模拟批量上传 - 使用Unsplash随机图片
+      const randomImageUrls = [
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1589992607780-84ff84e6b1a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1552820728-c8353b75a827?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1533711146667-b7eacd8a6d84?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1539015331034-28e25c54f0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+      ];
+      
+      const newImages: CourtImage[] = files.map((file, index) => ({
+        id: (Date.now() + index).toString(),
         courtId: venueId!,
-        url: URL.createObjectURL(file),
+        url: randomImageUrls[index % randomImageUrls.length],
         filename: file.name,
         size: file.size,
         uploadedAt: new Date().toISOString(),
       }));
+      
       setImages([...images, ...newImages]);
       message.success(`成功上传 ${files.length} 张图片`);
     } catch (error) {
@@ -546,9 +590,9 @@ export const VenueDetail: React.FC = () => {
         </Col>
       </Row>
 
-      {/* 场馆图片管理 */}
+      {/* 图片管理 */}
       <Card 
-        title={<><PictureOutlined /> 场馆图片 ({images.length})</>}
+        title={<><PictureOutlined /> 图片管理</>}
         className="shadow-sm"
         extra={
           <Space>
@@ -556,73 +600,143 @@ export const VenueDetail: React.FC = () => {
               <Button 
                 icon={<UploadOutlined />} 
                 loading={uploading}
+                type="primary"
+                ghost
               >
                 单张上传
               </Button>
             </Upload>
+            <Text type="secondary">
+              共 {images.length} 张图片
+            </Text>
           </Space>
         }
       >
-        {/* 批量上传区域 */}
-        <Dragger {...draggerProps} className="mb-6">
-          <p className="ant-upload-drag-icon">
-            <CloudUploadOutlined />
-          </p>
-          <p className="ant-upload-text">点击或拖拽文件到此区域批量上传</p>
-          <p className="ant-upload-hint">
-            支持单个或批量上传。支持 JPG、PNG、GIF 等格式，单个文件不超过 10MB
-          </p>
-        </Dragger>
+        {/* 上传区域 */}
+        <Row gutter={[16, 16]} className="mb-6">
+          <Col xs={24} lg={16}>
+            <Dragger {...draggerProps} style={{ height: 120 }}>
+              <p className="ant-upload-drag-icon">
+                <CloudUploadOutlined style={{ fontSize: 32, color: '#1890ff' }} />
+              </p>
+              <p className="ant-upload-text">点击或拖拽文件到此区域批量上传</p>
+              <p className="ant-upload-hint">
+                支持 JPG、PNG、GIF 格式，单个文件不超过 10MB
+              </p>
+            </Dragger>
+          </Col>
+          <Col xs={24} lg={8}>
+            <div className="h-full flex flex-col justify-center items-center bg-gray-50 rounded-lg p-4">
+              <PictureOutlined style={{ fontSize: 24, color: '#8c8c8c' }} />
+              <Text type="secondary" className="mt-2">
+                支持格式：JPG、PNG、GIF
+              </Text>
+              <Text type="secondary">
+                最大文件：10MB
+              </Text>
+              <Text type="secondary">
+                批量上传：无限制
+              </Text>
+            </div>
+          </Col>
+        </Row>
 
-        {/* 图片展示 */}
+        <Divider orientation="left">场馆图片展示</Divider>
+        
+        {/* 图片展示网格 */}
         {images.length === 0 ? (
           <Empty 
-            description="暂无图片"
+            description="暂无图片，请上传场馆图片"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
+            style={{ padding: '40px 0' }}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {images.map((image) => (
-              <div key={image.id} className="relative group">
-                <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden">
-                  <Image
+              <div key={image.id} className="relative group bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+                <div className="aspect-w-16 aspect-h-12 bg-gray-100 rounded-t-lg overflow-hidden">
+                  <img
                     src={image.url}
                     alt={image.filename}
-                    className="object-cover w-full h-full"
-                    preview={false}
+                    className="object-cover w-full h-48 transition-transform group-hover:scale-105"
                   />
                 </div>
                 
-                {/* 图片信息和操作 */}
+                {/* 图片操作按钮 */}
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    type="primary"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteImage(image)}
-                    className="shadow-lg"
-                  />
+                  <Space>
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        Modal.info({
+                          title: '图片预览',
+                          width: 800,
+                          content: (
+                            <div className="text-center">
+                              <img src={image.url} alt={image.filename} style={{ maxWidth: '100%', maxHeight: '70vh' }} />
+                            </div>
+                          ),
+                          okText: '关闭',
+                        });
+                      }}
+                      className="shadow-lg"
+                    />
+                    <Button
+                      type="primary"
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleDeleteImage(image)}
+                      className="shadow-lg"
+                    />
+                  </Space>
                 </div>
                 
-                <div className="mt-2">
-                  <Text 
-                    ellipsis={{ tooltip: image.filename }} 
-                    className="block text-sm font-medium text-gray-900"
-                  >
-                    {image.filename}
-                  </Text>
-                  <div className="flex justify-between items-center mt-1">
-                    <Text type="secondary" className="text-xs">
-                      {(image.size / 1024 / 1024).toFixed(2)} MB
+                {/* 图片信息 */}
+                <div className="p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <Text 
+                      ellipsis={{ tooltip: image.filename }} 
+                      className="text-sm font-medium text-gray-900 flex-1 mr-2"
+                    >
+                      {image.filename}
                     </Text>
                     {image.isMain && (
                       <Tag color="gold" size="small">主图</Tag>
                     )}
                   </div>
-                  <Text type="secondary" className="text-xs">
-                    {dayjs(image.uploadedAt).format('YYYY-MM-DD')}
-                  </Text>
+                  
+                  <div className="flex justify-between items-center text-xs text-gray-500">
+                    <span>{(image.size / 1024 / 1024).toFixed(2)} MB</span>
+                    <span>{dayjs(image.uploadedAt).format('MM/DD')}</span>
+                  </div>
+                  
+                  {/* 图片状态 */}
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
+                    <Space size="small">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <Text type="secondary" className="text-xs">已上传</Text>
+                    </Space>
+                    <Button 
+                      type="link" 
+                      size="small" 
+                      className="p-0 h-auto text-xs"
+                      onClick={() => {
+                        // 设为主图功能
+                        const updatedImages = images.map(img => ({
+                          ...img,
+                          isMain: img.id === image.id
+                        }));
+                        setImages(updatedImages);
+                        message.success('已设为主图');
+                      }}
+                      disabled={image.isMain}
+                    >
+                      {image.isMain ? '主图' : '设为主图'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
