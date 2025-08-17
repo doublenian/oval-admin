@@ -618,14 +618,14 @@ export const VenueDetail: React.FC = () => {
         title={<><PictureOutlined /> 图片管理</>}
         className="shadow-sm"
       >
-        {fileList.length >= 50 ? null : uploadButton}
+        <Upload
           action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
           listType="picture-card"
           fileList={fileList}
           onPreview={handlePreview}
           onChange={handleChange}
         >
-          {fileList.length >= 8 ? null : uploadButton}
+          {fileList.length >= 50 ? null : uploadButton}
         </Upload>
         {previewImage && (
           <Image
