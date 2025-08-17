@@ -6,15 +6,9 @@ import {
   Tag,
   Space,
   Typography,
-  Row,
-  Col,
   Spin,
-  message,
-  Empty,
   Upload,
   Modal,
-  Image,
-  Divider,
   Badge,
 } from 'antd';
 import {
@@ -29,32 +23,42 @@ import {
   InfoCircleOutlined,
   TrophyOutlined,
   SettingOutlined,
-  UploadOutlined,
-  CloudUploadOutlined,
-  DeleteOutlined,
-  EyeOutlined,
   PictureOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Venue, CourtImage } from '../../types';
+import { Venue } from '../../types';
 import { venuesAPI } from '../../services/api';
+import type { GetProp, UploadFile, UploadProps } from 'antd';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
-const { Dragger } = Upload;
+
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+const getBase64 = (file: FileType): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 export const VenueDetail: React.FC = () => {
   const { venueId } = useParams<{ venueId: string }>();
   const navigate = useNavigate();
   const [venue, setVenue] = useState<Venue | null>(null);
-  const [images, setImages] = useState<CourtImage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  
+  // 图片管理相关状态
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState('');
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   useEffect(() => {
     if (venueId) {
       fetchVenueDetail();
-      fetchVenueImages();
+      initializeImageList();
     }
   }, [venueId]);
 
@@ -70,140 +74,179 @@ export const VenueDetail: React.FC = () => {
     }
   };
 
-  const fetchVenueImages = async () => {
+  const initializeImageList = async () => {
     try {
-      // 模拟场馆图片数据 - 使用Unsplash图片
-      const mockImages: CourtImage[] = [
+      // 模拟已有图片数据 - 使用Unsplash高质量体育场馆图片
+      const mockFileList: UploadFile[] = [
         {
-          id: '1',
-          courtId: venueId!,
+          uid: '-1',
+          name: '场馆外观全景.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '场馆外观全景.jpg',
-          size: 1024000,
-          uploadedAt: '2024-01-01T00:00:00.000Z',
-          isMain: true,
         },
         {
-          id: '2',
-          courtId: venueId!,
+          uid: '-2',
+          name: '场馆内部视角.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '场馆内部视角.jpg',
-          size: 2048000,
-          uploadedAt: '2024-01-02T00:00:00.000Z',
         },
         {
-          id: '3',
-          courtId: venueId!,
+          uid: '-3',
+          name: '航拍俯视图.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '航拍俯视图.jpg',
-          size: 1500000,
-          uploadedAt: '2024-01-03T00:00:00.000Z',
         },
         {
-          id: '4',
-          courtId: venueId!,
+          uid: '-4',
+          name: '观众席视角.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '观众席视角.jpg',
-          size: 1800000,
-          uploadedAt: '2024-01-04T00:00:00.000Z',
         },
         {
-          id: '5',
-          courtId: venueId!,
+          uid: '-5',
+          name: '夜景照明效果.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1587385789097-0197a7fbd179?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '夜景照明效果.jpg',
-          size: 2200000,
-          uploadedAt: '2024-01-05T00:00:00.000Z',
         },
         {
-          id: '6',
-          courtId: venueId!,
+          uid: '-6',
+          name: '比赛现场氛围.jpg',
+          status: 'done',
           url: 'https://images.unsplash.com/photo-1606150674109-0a50c19b5c37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          filename: '比赛现场氛围.jpg',
-          size: 1600000,
-          uploadedAt: '2024-01-06T00:00:00.000Z',
+        },
+        {
+          uid: '-uploading',
+          percent: 65,
+          name: '上传中图片.jpg',
+          status: 'uploading',
+          url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        },
+        {
+          uid: '-error',
+          name: '上传失败.jpg',
+          status: 'error',
         },
       ];
-      setImages(mockImages);
+      setFileList(mockFileList);
     } catch (error) {
       message.error('获取场馆图片失败');
     }
   };
 
-  const handleUpload = async (file: File) => {
-    setUploading(true);
+  // 处理图片预览
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as FileType);
+    }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+  };
+
+  // 处理文件列表变化
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  // 自定义上传逻辑
+  const handleUpload = async (file: File): Promise<boolean> => {
     try {
-      // 模拟上传 - 使用Unsplash随机图片
+      // 模拟上传过程，使用随机Unsplash体育场馆图片
+      const randomImageUrls = [
+        'https://images.unsplash.com/photo-1544919982-b61976f0ba43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 体育场
+        'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 足球场
+        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 篮球场
+        'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 网球场
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 游泳馆
+      ];
+      
+      const randomUrl = randomImageUrls[Math.floor(Math.random() * randomImageUrls.length)];
+
+      // 模拟上传延迟
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      message.success('图片上传成功');
+      return true;
+    } catch (error) {
+      message.error('图片上传失败');
+      return false;
+    }
+  };
+
+  // 上传前的文件验证
+  const beforeUpload = (file: File) => {
+    const isImage = file.type.startsWith('image/');
+    if (!isImage) {
+      message.error('只能上传图片格式的文件!');
+      return false;
+    }
+    const isLt10M = file.size / 1024 / 1024 < 10;
+    if (!isLt10M) {
+      message.error('图片大小不能超过 10MB!');
+      return false;
+    }
+    return true;
+  };
+
+  // 自定义上传请求
+  const customRequest = async (options: any) => {
+    const { file, onSuccess, onError, onProgress } = options;
+    
+    try {
+      // 模拟上传进度
+      let percent = 0;
+      const timer = setInterval(() => {
+        percent += 10;
+        onProgress({ percent });
+        if (percent >= 100) {
+          clearInterval(timer);
+        }
+      }, 100);
+
+      // 模拟上传API调用
       const randomImageUrls = [
         'https://images.unsplash.com/photo-1544919982-b61976f0ba43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
         'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
         'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
         'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
       ];
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const randomUrl = randomImageUrls[Math.floor(Math.random() * randomImageUrls.length)];
       
-      const newImage: CourtImage = {
-        id: Date.now().toString(),
-        courtId: venueId!,
+      onSuccess({
         url: randomUrl,
-        filename: file.name,
-        size: file.size,
-        uploadedAt: new Date().toISOString(),
-      };
-      setImages([...images, newImage]);
-      message.success('图片上传成功');
+        name: file.name
+      });
     } catch (error) {
-      message.error('图片上传失败');
-    } finally {
-      setUploading(false);
+      onError(error);
     }
   };
 
-  const handleBulkUpload = async (files: File[]) => {
-    setUploading(true);
-    try {
-      // 模拟批量上传 - 使用Unsplash随机图片
-      const randomImageUrls = [
-        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1589992607780-84ff84e6b1a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1552820728-c8353b75a827?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1533711146667-b7eacd8a6d84?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1539015331034-28e25c54f0e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      ];
-      
-      const newImages: CourtImage[] = files.map((file, index) => ({
-        id: (Date.now() + index).toString(),
-        courtId: venueId!,
-        url: randomImageUrls[index % randomImageUrls.length],
-        filename: file.name,
-        size: file.size,
-        uploadedAt: new Date().toISOString(),
-      }));
-      
-      setImages([...images, ...newImages]);
-      message.success(`成功上传 ${files.length} 张图片`);
-    } catch (error) {
-      message.error('批量上传失败');
-    } finally {
-      setUploading(false);
-    }
-  };
+  // 上传按钮
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      <PlusOutlined />
+      <div style={{ marginTop: 8 }}>上传图片</div>
+    </button>
+  );
 
-  const handleDeleteImage = (image: CourtImage) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: `您确定要删除图片"${image.filename}"吗？`,
-      okType: 'danger',
-      onOk: async () => {
-        try {
-          setImages(images.filter(img => img.id !== image.id));
+  // 删除图片确认
+  const handleRemove = (file: UploadFile) => {
+    return new Promise<boolean>((resolve) => {
+      Modal.confirm({
+        title: '确认删除',
+        content: `您确定要删除图片"${file.name}"吗？`,
+        okType: 'danger',
+        onOk: () => {
           message.success('删除成功');
-        } catch (error) {
-          message.error('删除失败');
-        }
-      },
+          resolve(true);
+        },
+        onCancel: () => {
+          resolve(false);
+        },
+      });
     });
   };
 
@@ -244,50 +287,6 @@ export const VenueDetail: React.FC = () => {
     accept: 'image/*',
     showUploadList: false,
     beforeUpload: (file: File, fileList: File[]) => {
-      const isImage = file.type.startsWith('image/');
-      if (!isImage) {
-        message.error('只能上传图片文件!');
-        return false;
-      }
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) {
-        message.error('图片大小不能超过 10MB!');
-        return false;
-      }
-      
-      // 如果是多选，批量上传
-      if (fileList.length > 1) {
-        handleBulkUpload(fileList);
-      } else {
-        handleUpload(file);
-      }
-      return false;
-    },
-  };
-
-  const draggerProps = {
-    name: 'images',
-    multiple: true,
-    accept: 'image/*',
-    showUploadList: false,
-    beforeUpload: (file: File, fileList: File[]) => {
-      const validFiles = fileList.filter(f => {
-        const isImage = f.type.startsWith('image/');
-        const isLt10M = f.size / 1024 / 1024 < 10;
-        return isImage && isLt10M;
-      });
-      
-      if (validFiles.length !== fileList.length) {
-        message.error('部分文件格式不支持或文件过大');
-      }
-      
-      if (validFiles.length > 0) {
-        handleBulkUpload(validFiles);
-      }
-      return false;
-    },
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -597,159 +596,47 @@ export const VenueDetail: React.FC = () => {
         extra={
           <Space>
             <Text type="secondary">
-              共 {images.length} 张图片
+              共 {fileList.length} 张图片
             </Text>
           </Space>
         }
       >
-        {/* 网格展示已有图片和上传区域 */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {/* 上传卡片 - 总是显示在第一个位置 */}
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-            <Upload
-              {...uploadProps}
-              className="h-full w-full"
-              showUploadList={false}
-            >
-              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
-                <CloudUploadOutlined className="text-3xl text-gray-400 mb-2" />
-                <Text type="secondary" className="text-xs text-center px-2">
-                  点击上传
-                </Text>
-                <Text type="secondary" className="text-xs text-center px-2">
-                  或拖拽到此处
-                </Text>
-              </div>
-            </Upload>
-          </div>
-          
-          {/* 批量上传卡片 */}
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-            <Upload
-              {...draggerProps}
-              className="h-full w-full"
-              showUploadList={false}
-            >
-              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
-                <UploadOutlined className="text-3xl text-gray-400 mb-2" />
-                <Text type="secondary" className="text-xs text-center px-2">
-                  批量上传
-                </Text>
-                <Text type="secondary" className="text-xs text-center px-2">
-                  支持多选
-                </Text>
-              </div>
-            </Upload>
-          </div>
-
-          {/* 已有图片展示 */}
-          {images.map((image) => (
-            <div key={image.id} className="aspect-square relative group bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all overflow-hidden">
-              <img
-                src={image.url}
-                alt={image.filename}
-                className="w-full h-full object-cover"
-              />
-              
-              {/* 遮罩层和操作按钮 */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Space>
-                  <Button
-                    type="primary"
-                    size="small"
-                    icon={<EyeOutlined />}
-                    onClick={() => {
-                      Modal.info({
-                        title: '图片预览',
-                        width: '80vw',
-                        style: { top: 20 },
-                        content: (
-                          <div className="text-center">
-                            <img 
-                              src={image.url} 
-                              alt={image.filename} 
-                              style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }} 
-                            />
-                            <div className="mt-4 text-left">
-                              <Text strong>文件名：</Text><Text>{image.filename}</Text><br/>
-                              <Text strong>大小：</Text><Text>{(image.size / 1024 / 1024).toFixed(2)} MB</Text><br/>
-                              <Text strong>上传时间：</Text><Text>{dayjs(image.uploadedAt).format('YYYY-MM-DD HH:mm:ss')}</Text>
-                            </div>
-                          </div>
-                        ),
-                        okText: '关闭',
-                      });
-                    }}
-                    ghost
-                  />
-                  <Button
-                    type="primary"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteImage(image)}
-                    ghost
-                  />
-                </Space>
-              </div>
-              
-              {/* 主图标识 */}
-              {image.isMain && (
-                <div className="absolute top-2 left-2">
-                  <Tag color="gold" size="small" className="text-xs">主图</Tag>
-                </div>
-              )}
-              
-              {/* 图片信息 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
-                <Text 
-                  ellipsis={{ tooltip: image.filename }} 
-                  className="text-white text-xs block"
-                >
-                  {image.filename}
-                </Text>
-                <div className="flex justify-between items-center mt-1">
-                  <Text className="text-white text-xs opacity-80">
-                    {(image.size / 1024 / 1024).toFixed(1)}MB
-                  </Text>
-                  <Button 
-                    type="link" 
-                    size="small" 
-                    className="text-white opacity-80 hover:opacity-100 p-0 h-auto"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const updatedImages = images.map(img => ({
-                        ...img,
-                        isMain: img.id === image.id
-                      }));
-                      setImages(updatedImages);
-                      message.success('已设为主图');
-                    }}
-                    disabled={image.isMain}
-                  >
-                    <span className="text-xs">{image.isMain ? '主图' : '设为主图'}</span>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Ant Design Upload 组件 */}
+        <Upload
+          customRequest={customRequest}
+          listType="picture-card"
+          fileList={fileList}
+          onPreview={handlePreview}
+          onChange={handleChange}
+          onRemove={handleRemove}
+          beforeUpload={beforeUpload}
+          multiple
+          accept="image/*"
+        >
+          {fileList.length >= 12 ? null : uploadButton}
+        </Upload>
         
-        {/* 空状态 */}
-        {images.length === 0 && (
-          <div className="text-center py-8 mt-4">
-            <PictureOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
-            <Text type="secondary" className="block mt-4">
-              暂无场馆图片，点击上方上传按钮添加图片
-            </Text>
-          </div>
+        {/* 图片预览 */}
+        {previewImage && (
+          <Image
+            wrapperStyle={{ display: 'none' }}
+            preview={{
+              visible: previewOpen,
+              onVisibleChange: (visible) => setPreviewOpen(visible),
+              afterOpenChange: (visible) => !visible && setPreviewImage(''),
+            }}
+            src={previewImage}
+          />
         )}
         
-        {/* 上传说明 */}
+        {/* 使用说明 */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <Text type="secondary" className="text-sm">
             <InfoCircleOutlined className="mr-2 text-blue-500" />
-            支持 JPG、PNG、GIF 格式，单个文件不超过 10MB。支持单张上传和批量上传。
+            • 支持 JPG、PNG、GIF 等图片格式<br/>
+            • 单个文件大小不超过 10MB<br/>
+            • 支持多选批量上传，最多12张图片<br/>
+            • 点击图片可以预览，点击删除按钮可以移除图片
           </Text>
         </div>
       </Card>
