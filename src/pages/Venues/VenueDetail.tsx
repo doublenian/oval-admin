@@ -14,6 +14,7 @@ import {
   Col,
   Empty,
   message,
+  Image,
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -258,6 +259,107 @@ export const VenueDetail: React.FC = () => {
     }
   };
 
+  // 解码球场等级和赛事标记
+  const decodeCategoryTags = (category?: string) => {
+    if (!category) return [];
+    
+    const tags: { text: string; color: string; type: 'level' | 'event' }[] = [];
+    const items = category.split(',').map(item => item.trim());
+    
+    // 球场等级映射
+    const levelMap: Record<string, { name: string; color: string }> = {
+      'A': { name: '杰出', color: 'red' },
+      'B': { name: '优秀', color: 'blue' },
+      'N': { name: '常规', color: 'default' },
+      'S': { name: '欠佳', color: 'orange' },
+      'T': { name: '简陋', color: 'gray' },
+      'H': { name: '历史', color: 'purple' }
+    };
+
+    // 赛事标记映射
+    const eventMap: Record<string, { name: string; color: string }> = {
+      'U4': { name: '欧足联四类球场', color: 'blue' },
+      'U3': { name: '欧足联三类球场', color: 'blue' },
+      'U2': { name: '欧足联二类球场', color: 'blue' },
+      'U': { name: '欧足联认证', color: 'blue' },
+      'R': { name: '洲际比赛', color: 'green' },
+      'W': { name: '世界杯', color: 'gold' },
+      'W1': { name: '世界杯主赛场', color: 'gold' },
+      'W2': { name: '半决赛球场', color: 'gold' },
+      'W3': { name: '小组赛球场', color: 'gold' },
+      'O': { name: '奥运会', color: 'cyan' },
+      'O1': { name: '奥运会', color: 'cyan' },
+      'C1': { name: '国家体育场', color: 'magenta' }
+    };
+
+    items.forEach(item => {
+      if (levelMap[item]) {
+        tags.push({
+          text: levelMap[item].name,
+          color: levelMap[item].color,
+          type: 'level'
+        });
+      } else if (eventMap[item]) {
+        tags.push({
+          text: eventMap[item].name,
+          color: eventMap[item].color,
+          type: 'event'
+        });
+      }
+    });
+
+    return tags;
+  };
+
+  // 解码球场类型
+  const decodeVenueType = (type?: string) => {
+    const typeMap: Record<string, string> = {
+      'A': '田径场', 'B': '棒球场', 'C': '板球场',
+      'F': '足球场', 'R': '英式橄榄球场', 'af': '美式橄榄球场',
+      'K': '篮球', 'H': '手球', 'S': '滑冰',
+      'Y': '冰球', 'Z': '综合', 'T': '网球',
+      'D': '冰蓝转换', 'E': '电竞', 'G': '室内足球'
+    };
+    return type ? typeMap[type] || type : '-';
+  };
+
+  // 解码颜色编码
+  const decodeColorCode = (code?: string) => {
+    if (!code) return null;
+
+    const colorMap: Record<string, string> = {
+      'Re': '红色', 'Or': '橙色', 'Ye': '黄色', 'Gn': '绿色',
+      'Ch': '青色', 'Bl': '蓝色', 'Pe': '紫色', 'Br': '棕色',
+      'Pk': '粉色', 'Bk': '黑色', 'Wh': '白色', 'Gy': '灰色',
+      'Vr': '无座椅', 'Un': '未知'
+    };
+
+    const compositeMap: Record<string, string> = {
+      'JO': '组合', 'PI': '像素', 'PU': '纯色', 'PA': '图案', 'WD': '文字'
+    };
+
+    const parts = code.split('_');
+    const colors = parts[0];
+    const composite = parts[1];
+    const hasWD = parts.includes('WD');
+
+    let result = '';
+    
+    // 解码颜色
+    const colorCodes = colors.match(/.{1,2}/g) || [];
+    const colorNames = colorCodes.map(c => colorMap[c] || c).join('+');
+    
+    if (colorNames) result += colorNames;
+    if (composite && compositeMap[composite]) {
+      result += ` (${compositeMap[composite]})`;
+    }
+    if (hasWD) {
+      result += ' 含文字';
+    }
+
+    return result || code;
+  };
+
   // 处理图片预览
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
@@ -279,27 +381,6 @@ export const VenueDetail: React.FC = () => {
       <div style={{ marginTop: 8 }}>上传</div>
     </div>
   );
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'A': return 'red';
-      case 'B': return 'blue';
-      case 'S': return 'green';
-      case 'N': return 'orange';
-      default: return 'default';
-    }
-  };
-
-  const getCategoryName = (category: string) => {
-    if (!category) return '未分类';
-    switch (category) {
-      case 'A': return 'A级场馆';
-      case 'B': return 'B级场馆';
-      case 'S': return '特殊场馆';
-      case 'N': return '标准场馆';
-      default: return category;
-    }
-  };
 
   const formatCapacity = (capacity?: number) => {
     if (!capacity) return '-';
@@ -327,60 +408,63 @@ export const VenueDetail: React.FC = () => {
     );
   }
 
+  const categoryTags = decodeCategoryTags(venue.category);
+
   return (
     <div className="space-y-8">
       {/* 顶部导航和标题 */}
       <Card className="shadow-sm border-0" bodyStyle={{ padding: '24px 32px' }}>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* 左侧内容 */}
-          <div className="flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <Button
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate('/venues')}
-                type="default"
-                className="flex-shrink-0"
-              >
-                返回列表
-              </Button>
+        <div className="flex flex-col gap-6">
+          {/* 返回按钮 */}
+          <div>
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate('/venues')}
+              type="default"
+              className="flex-shrink-0"
+            >
+              返回列表
+            </Button>
+          </div>
+          
+          {/* 场馆名称区域 */}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            {/* 左侧：场馆名称 */}
+            <div className="flex-1">
+              <Title level={1} className="mb-2 text-2xl lg:text-3xl font-bold text-gray-900">
+                {venue.name}
+              </Title>
             </div>
             
-            <div className="space-y-3">
-              {/* 场馆名称 */}
-              <div className="space-y-2">
-                <Title level={1} className="mb-2 text-2xl lg:text-3xl font-bold text-gray-900">
-                  {venue.name}
-                </Title>
-                {venue.chinese_name && (
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <Text className="text-lg text-gray-600">
-                      {venue.chinese_name}
-                    </Text>
-                    <div className="flex flex-wrap gap-2 sm:ml-auto">
-                      {venue.link && (
-                        <Button
-                          type="link"
-                          size="small"
-                          icon={<GlobalOutlined />}
-                          onClick={() => window.open(venue.link, '_blank')}
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          官方链接
-                        </Button>
-                      )}
-                      {venue.additional_link && (
-                        <Button
-                          type="link"
-                          size="small"
-                          icon={<GlobalOutlined />}
-                          onClick={() => window.open(venue.additional_link, '_blank')}
-                          className="text-gray-600 hover:text-blue-600"
-                        >
-                          附加链接
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+            {/* 右侧：英文名称和链接 */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+              {venue.chinese_name && (
+                <Text className="text-lg text-gray-600 sm:mr-4">
+                  {venue.chinese_name}
+                </Text>
+              )}
+              <div className="flex flex-wrap gap-2">
+                {venue.link && (
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<GlobalOutlined />}
+                    onClick={() => window.open(venue.link, '_blank')}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    官方链接
+                  </Button>
+                )}
+                {venue.additional_link && (
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<GlobalOutlined />}
+                    onClick={() => window.open(venue.additional_link, '_blank')}
+                    className="text-gray-600 hover:text-blue-600"
+                  >
+                    附加链接
+                  </Button>
                 )}
               </div>
             </div>
@@ -391,9 +475,9 @@ export const VenueDetail: React.FC = () => {
       <Row gutter={[32, 32]}>
         {/* 主要信息 */}
         <Col xs={24}>
-          {/* 基本信息 */}
+          {/* 基本信息 (包含所有32个字段) */}
           <Card 
-            title={<><InfoCircleOutlined /> 基本信息</>}
+            title={<><InfoCircleOutlined /> 场馆详细信息</>}
             className="mb-8 shadow-sm border-0"
             bodyStyle={{ padding: '32px' }}
           >
@@ -404,171 +488,229 @@ export const VenueDetail: React.FC = () => {
               labelStyle={{ 
                 background: '#fafafa', 
                 fontWeight: '500',
-                padding: '16px'
+                padding: '16px',
+                width: '160px'
               }}
               contentStyle={{ 
                 padding: '16px'
               }}
             >
+              {/* 字段1-2: 英文名和中文名 */}
               <Descriptions.Item 
-                label={<><EnvironmentOutlined /> 完整位置</>}
+                label="英文名称 (Name)"
+                span={{ xs: 1, sm: 2, md: 3 }}
+              >
+                <Text strong className="text-lg text-blue-600">
+                  {venue.name}
+                </Text>
+              </Descriptions.Item>
+              
+              <Descriptions.Item 
+                label="中文名称 (ChineseName)"
+                span={{ xs: 1, sm: 2, md: 3 }}
+              >
+                <Text className="text-base">
+                  {venue.chinese_name || '-'}
+                </Text>
+              </Descriptions.Item>
+
+              {/* 字段3: 等级与赛事标记 */}
+              <Descriptions.Item 
+                label="等级与赛事 (Category)"
+                span={{ xs: 1, sm: 2, md: 3 }}
+              >
+                {categoryTags.length > 0 ? (
+                  <Space wrap size="small">
+                    {categoryTags.map((tag, index) => (
+                      <Tag 
+                        key={index} 
+                        color={tag.color}
+                        className={`px-3 py-1 ${tag.type === 'level' ? 'border-dashed' : ''}`}
+                      >
+                        {tag.text}
+                      </Tag>
+                    ))}
+                  </Space>
+                ) : (
+                  <Text type="secondary">-</Text>
+                )}
+              </Descriptions.Item>
+
+              {/* 字段4-5: 建成和更新时间 */}
+              <Descriptions.Item label="建成年份 (Built)">
+                <Text strong>{venue.built_year || '-'}</Text>
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="更新年份 (Update)" span={2}>
+                {venue.update_year ? (
+                  <Text type="secondary">更新: {venue.update_year}</Text>
+                ) : (
+                  <Text type="secondary">-</Text>
+                )}
+              </Descriptions.Item>
+
+              {/* 字段6-8: 地理位置 */}
+              <Descriptions.Item 
+                label={<><EnvironmentOutlined /> 地理位置</>}
                 span={3}
               >
                 <Space wrap size="middle">
                   <Tag color="blue">{venue.region}</Tag>
                   <Text strong>{venue.country}</Text>
-                  {venue.city && <Text type="secondary">{venue.city}</Text>}
+                  {venue.city && <Text>{venue.city}</Text>}
                 </Space>
               </Descriptions.Item>
-              
-              <Descriptions.Item label={<><TeamOutlined /> 总容量</>}>
-                <Text strong className="text-lg text-blue-600">
-                  {formatCapacity(venue.capacity)} 人
-                </Text>
-              </Descriptions.Item>
-              
-              <Descriptions.Item label={<><CalendarOutlined /> 建成年份</>}>
-                <Space size="small">
-                  <Text strong>{venue.built_year || '-'}</Text>
-                  {venue.update_year && (
-                    <Text type="secondary">(更新: {venue.update_year})</Text>
-                  )}
-                </Space>
-              </Descriptions.Item>
-              
-              <Descriptions.Item label="GA层级">
-                {venue.ga_tier || '-'}
-              </Descriptions.Item>
-              
+
+              {/* 字段9: 建筑师 */}
               <Descriptions.Item 
-                label={<><BuildOutlined /> 建筑师</>}
+                label={<><BuildOutlined /> 建筑师 (Architect)</>}
                 span={3}
               >
                 <Text className="text-base font-medium">{venue.architect || '-'}</Text>
               </Descriptions.Item>
-              
-              <Descriptions.Item label="场馆类型">
-                {venue.venue_type || '-'}
+
+              {/* 字段10: 球场类型 */}
+              <Descriptions.Item label="球场类型 (Type)">
+                <Text>{decodeVenueType(venue.venue_type)}</Text>
+              </Descriptions.Item>
+
+              {/* 字段11: 看台轮廓 */}
+              <Descriptions.Item label="看台轮廓 (Stand)" span={2}>
+                <Text>{venue.stand_contour || '-'}</Text>
+              </Descriptions.Item>
+
+              {/* 字段12-13: GA层级和容量 */}
+              <Descriptions.Item label="看台层数 (GATier)">
+                <Text>{venue.ga_tier || '-'}</Text>
               </Descriptions.Item>
               
-              {venue.stand_contour && (
-                <Descriptions.Item label="看台轮廓" span={2}>
-                  {venue.stand_contour}
-                </Descriptions.Item>
-              )}
-              
-              {/* 技术规格 */}
-              {venue.height && (
-                <Descriptions.Item label={<><VerticalAlignMiddleOutlined /> 高度</>}>
-                  <Text strong>{venue.height} 米</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.total_area && (
-                <Descriptions.Item label="总面积">
-                  <Text strong>{formatArea(venue.total_area)}</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.building_size && (
-                <Descriptions.Item label="建筑尺寸">
-                  <Text>{venue.building_size}</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.fop && (
-                <Descriptions.Item label="场地尺寸(FOP)" span={2}>
-                  <Text>{venue.fop}</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.screen_area && (
-                <Descriptions.Item label="屏幕面积">
-                  <Text>{venue.screen_area}</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.temperature_capacity && (
-                <Descriptions.Item label="温控容量">
-                  <Text>{formatCapacity(venue.temperature_capacity)} 人</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.construction_code && (
-                <Descriptions.Item label="建设代码">
-                  <Text code>{venue.construction_code}</Text>
-                </Descriptions.Item>
-              )}
-              
-              {venue.main_color_code && (
-                <Descriptions.Item label="主色调" span={2}>
-                  <Space size="small">
-                    <div 
-                      className="w-4 h-4 rounded border"
-                      style={{ backgroundColor: venue.main_color_code }}
-                    />
-                    <Text code>{venue.main_color_code}</Text>
-                  </Space>
-                </Descriptions.Item>
-              )}
-              
-              {/* 容量详情 */}
+              <Descriptions.Item label={<><TeamOutlined /> 总座席数 (Capacity)</>}>
+                <Text strong className="text-lg text-blue-600">
+                  {formatCapacity(venue.capacity)}
+                </Text>
+              </Descriptions.Item>
+
+              <Descriptions.Item label="温控容量">
+                <Text>{venue.temperature_capacity ? formatCapacity(venue.temperature_capacity) : '-'}</Text>
+              </Descriptions.Item>
+
+              {/* 字段17-22: 各类座席数 */}
               {venue.vip_capacity && (
-                <Descriptions.Item label="VIP 席位">
+                <Descriptions.Item label="VIP席位">
                   <Text strong className="text-purple-600">
-                    {formatCapacity(venue.vip_capacity)} 人
+                    {formatCapacity(venue.vip_capacity)}
                   </Text>
                 </Descriptions.Item>
               )}
               
               {venue.hospitality_capacity && (
-                <Descriptions.Item label="接待席位">
+                <Descriptions.Item label="高档席位 (Hospitality)">
                   <Text strong className="text-green-600">
-                    {formatCapacity(venue.hospitality_capacity)} 人
+                    {formatCapacity(venue.hospitality_capacity)}
                   </Text>
                 </Descriptions.Item>
               )}
               
               {venue.press_capacity && (
-                <Descriptions.Item label="媒体席位">
+                <Descriptions.Item label="媒体席位 (Press)">
                   <Text strong className="text-orange-600">
-                    {formatCapacity(venue.press_capacity)} 人
+                    {formatCapacity(venue.press_capacity)}
                   </Text>
                 </Descriptions.Item>
               )}
               
               {venue.disabled_capacity && (
-                <Descriptions.Item label="无障碍席位">
+                <Descriptions.Item label="无障碍席位 (Disabled)">
                   <Text strong className="text-cyan-600">
-                    {formatCapacity(venue.disabled_capacity)} 人
+                    {formatCapacity(venue.disabled_capacity)}
                   </Text>
                 </Descriptions.Item>
               )}
               
               {venue.suites_count && (
-                <Descriptions.Item label="豪华套房">
+                <Descriptions.Item label="豪华包厢 (Suites)">
                   <Text strong className="text-red-600">
                     {venue.suites_count} 间
                   </Text>
                 </Descriptions.Item>
               )}
+
+              {/* 字段23-25: 技术规格 */}
+              {venue.height && (
+                <Descriptions.Item label={<><VerticalAlignMiddleOutlined /> 建筑高度 (Height)</>}>
+                  <Text strong>{venue.height} 米</Text>
+                </Descriptions.Item>
+              )}
               
-              {/* 投资信息 */}
+              {venue.fop && (
+                <Descriptions.Item label="场地尺寸 (FOP)" span={2}>
+                  <Text>{venue.fop}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.screen_area && (
+                <Descriptions.Item label="大屏尺寸 (Screen)">
+                  <Text>{venue.screen_area}</Text>
+                </Descriptions.Item>
+              )}
+
+              {/* 字段27-28: 面积和成本 */}
+              {venue.total_area && (
+                <Descriptions.Item label="总面积 (Total Area)">
+                  <Text strong>{formatArea(venue.total_area)}</Text>
+                </Descriptions.Item>
+              )}
+              
               {venue.construction_cost && (
-                <Descriptions.Item label={<><DollarOutlined /> 建设成本</>} span={3}>
-                  <Text className="text-lg font-bold text-green-600">
+                <Descriptions.Item label={<><DollarOutlined /> 建设成本 (Cost)</>} span={2}>
+                  <Text className="text-xl font-bold text-green-600">
                     {venue.construction_cost}
                   </Text>
                 </Descriptions.Item>
               )}
+
+              {/* 字段29: 管理索引 */}
+              {venue.venue_index && (
+                <Descriptions.Item label="场馆编号 (Index)">
+                  <Badge count={venue.venue_index} style={{ backgroundColor: '#52c41a' }}>
+                    <Text>编号</Text>
+                  </Badge>
+                </Descriptions.Item>
+              )}
+
+              {/* 字段31-32: 编码信息 */}
+              {venue.construction_code && (
+                <Descriptions.Item label="屋盖结构编码" span={2}>
+                  <Text code>{venue.construction_code}</Text>
+                </Descriptions.Item>
+              )}
               
+              {venue.main_color_code && (
+                <Descriptions.Item label="座椅颜色编码" span={3}>
+                  <Space>
+                    <Text code>{venue.main_color_code}</Text>
+                    <Text type="secondary">({decodeColorCode(venue.main_color_code)})</Text>
+                  </Space>
+                </Descriptions.Item>
+              )}
+              
+              {venue.building_size && (
+                <Descriptions.Item label="建筑尺寸" span={3}>
+                  <Text>{venue.building_size}</Text>
+                </Descriptions.Item>
+              )}
+
               {/* 系统信息 */}
               <Descriptions.Item label="创建时间">
-                {venue.created_at ? dayjs(venue.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+                <Text type="secondary">
+                  {venue.created_at ? dayjs(venue.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+                </Text>
               </Descriptions.Item>
               
               <Descriptions.Item label="更新时间" span={2}>
-                {venue.updated_at ? dayjs(venue.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+                <Text type="secondary">
+                  {venue.updated_at ? dayjs(venue.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+                </Text>
               </Descriptions.Item>
             </Descriptions>
           </Card>
@@ -576,7 +718,7 @@ export const VenueDetail: React.FC = () => {
           {/* 赛事与俱乐部信息 */}
           {venue.events_clubs && (
             <Card 
-              title={<><TrophyOutlined /> 赛事与俱乐部</>}
+              title={<><TrophyOutlined /> 赛事与俱乐部 (Events & Clubs)</>}
               className="shadow-sm mb-8 border-0"
               bodyStyle={{ padding: '32px' }}
             >
@@ -598,7 +740,6 @@ export const VenueDetail: React.FC = () => {
             </Card>
           )}
         </Col>
-
       </Row>
 
       {/* 图片管理 */}
