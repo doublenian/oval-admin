@@ -35,6 +35,21 @@ export const AdminLayout: React.FC = () => {
       ],
     },
     {
+      key: '/indoor-courts',
+      icon: <UserOutlined />,
+      label: '室内球场',
+      children: [
+        {
+          key: '/indoor-courts',
+          label: '球场清单',
+        },
+        {
+          key: '/indoor-courts/bulk-upload',
+          label: '批量上传',
+        },
+      ],
+    },
+    {
       key: '/users',
       icon: <UserOutlined />,
       label: '用户管理',
@@ -99,7 +114,7 @@ export const AdminLayout: React.FC = () => {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          defaultOpenKeys={['/courts', '/users']}
+          defaultOpenKeys={['/courts', '/indoor-courts', '/users']}
           items={menuItems}
           onClick={({ key }) => handleMenuClick(key)}
         />
