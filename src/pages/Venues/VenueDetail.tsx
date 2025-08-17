@@ -20,7 +20,7 @@ import {
   CalendarOutlined,
   BuildOutlined,
   DollarOutlined,
-  HeightOutlined,
+  VerticalAlignMiddleOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Venue } from '../../types';
@@ -178,7 +178,7 @@ export const VenueDetail: React.FC = () => {
               </Descriptions.Item>
               
               {venue.height && (
-                <Descriptions.Item label={<span><HeightOutlined /> 高度</span>}>
+                <Descriptions.Item label={<span><VerticalAlignMiddleOutlined /> 高度</span>}>
                   {venue.height} 米
                 </Descriptions.Item>
               )}
