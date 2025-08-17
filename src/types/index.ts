@@ -41,3 +41,40 @@ export interface AuthUser {
   email: string;
   role: string;
 }
+
+export interface Venue {
+  id: string;
+  name: string;
+  chinese_name?: string;
+  category?: string;
+  link?: string;
+  built_year?: number;
+  update_year?: number;
+  region?: string;
+  country?: string;
+  city?: string;
+  architect?: string;
+  venue_type?: string;
+  stand_contour?: string;
+  ga_tier?: number;
+  capacity?: number;
+  vip_capacity?: number;
+  hospitality_capacity?: number;
+  press_capacity?: number;
+  disabled_capacity?: number;
+  suites_count?: number;
+  temperature_capacity?: number;
+  height?: number;
+  fop?: string;
+  screen_area?: string;
+  events_clubs?: string;
+  total_area?: number;
+  construction_cost?: string;
+  venue_index?: number;
+  additional_link?: string;
+  construction_code?: string;
+  main_color_code?: string;
+  building_size?: string;
+  created_at?: string;
+  updated_at?: string;
+}

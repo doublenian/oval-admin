@@ -44,6 +44,8 @@ function App() {
               <Route path="indoor-courts/bulk-upload" element={<IndoorBulkUpload />} />
               <Route path="users" element={<UserList />} />
               <Route path="users/create" element={<div>新增用户</div>} />
+              <Route path="venues" element={<VenueList />} />
+              <Route path="venues/:venueId" element={<VenueDetail />} />
             </Route>
           </Routes>
         </Router>

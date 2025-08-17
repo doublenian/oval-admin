@@ -64,6 +64,17 @@ export const AdminLayout: React.FC = () => {
         },
       ],
     },
+    {
+      key: '/venues',
+      icon: <UserOutlined />,
+      label: '场馆数据库',
+      children: [
+        {
+          key: '/venues',
+          label: '全球场馆',
+        },
+      ],
+    },
   ];
 
   const userMenuItems = [
