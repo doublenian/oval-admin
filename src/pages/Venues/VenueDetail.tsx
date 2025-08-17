@@ -29,10 +29,6 @@ import {
   SettingOutlined,
   PictureOutlined,
   PlusOutlined,
-  CloudUploadOutlined,
-  UploadOutlined,
-  EyeOutlined,
-  DeleteOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Venue } from '../../types';
@@ -57,17 +53,52 @@ export const VenueDetail: React.FC = () => {
   const navigate = useNavigate();
   const [venue, setVenue] = useState<Venue | null>(null);
   const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState<any[]>([]);
   
   // 图片管理相关状态
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([
+    {
+      uid: '-1',
+      name: '场馆外观全景.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-2',
+      name: '场馆内部视角.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-3',
+      name: '航拍俯视图.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-4',
+      name: '观众席视角.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-uploading',
+      percent: 65,
+      name: '上传中图片.jpg',
+      status: 'uploading',
+      url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-error',
+      name: '上传失败.jpg',
+      status: 'error',
+    },
+  ]);
 
   useEffect(() => {
     if (venueId) {
       fetchVenueDetail();
-      initializeImageList();
     }
   }, [venueId]);
 
@@ -83,86 +114,6 @@ export const VenueDetail: React.FC = () => {
     }
   };
 
-  const initializeImageList = async () => {
-    try {
-      // 模拟已有图片数据 - 使用Unsplash高质量体育场馆图片
-      const mockFileList: UploadFile[] = [
-        {
-          uid: '-1',
-          name: '场馆外观全景.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-2',
-          name: '场馆内部视角.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-3',
-          name: '航拍俯视图.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-4',
-          name: '观众席视角.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-5',
-          name: '夜景照明效果.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1587385789097-0197a7fbd179?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-6',
-          name: '比赛现场氛围.jpg',
-          status: 'done',
-          url: 'https://images.unsplash.com/photo-1606150674109-0a50c19b5c37?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-uploading',
-          percent: 65,
-          name: '上传中图片.jpg',
-          status: 'uploading',
-          url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        },
-        {
-          uid: '-error',
-          name: '上传失败.jpg',
-          status: 'error',
-        },
-      ];
-      setFileList(mockFileList);
-      
-      // 模拟图片数据
-      const mockImages = [
-        {
-          id: '1',
-          filename: '场馆外观全景.jpg',
-          url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          size: 2048000,
-          uploadedAt: new Date(),
-          isMain: true,
-        },
-        {
-          id: '2',
-          filename: '场馆内部视角.jpg',
-          url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-          size: 1536000,
-          uploadedAt: new Date(),
-          isMain: false,
-        },
-      ];
-      setImages(mockImages);
-    } catch (error) {
-      message.error('获取场馆图片失败');
-    }
-  };
-
   // 处理图片预览
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
@@ -174,125 +125,16 @@ export const VenueDetail: React.FC = () => {
   };
 
   // 处理文件列表变化
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
     setFileList(newFileList);
-  };
-
-  // 自定义上传逻辑
-  const handleUpload = async (file: File): Promise<boolean> => {
-    try {
-      // 模拟上传过程，使用随机Unsplash体育场馆图片
-      const randomImageUrls = [
-        'https://images.unsplash.com/photo-1544919982-b61976f0ba43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 体育场
-        'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 足球场
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 篮球场
-        'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 网球场
-        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // 游泳馆
-      ];
-      
-      const randomUrl = randomImageUrls[Math.floor(Math.random() * randomImageUrls.length)];
-
-      // 模拟上传延迟
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      message.success('图片上传成功');
-      return true;
-    } catch (error) {
-      message.error('图片上传失败');
-      return false;
-    }
-  };
-
-  // 上传前的文件验证
-  const beforeUpload = (file: File) => {
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
-      message.error('只能上传图片格式的文件!');
-      return false;
-    }
-    const isLt10M = file.size / 1024 / 1024 < 10;
-    if (!isLt10M) {
-      message.error('图片大小不能超过 10MB!');
-      return false;
-    }
-    return true;
-  };
-
-  // 自定义上传请求
-  const customRequest = async (options: any) => {
-    const { file, onSuccess, onError, onProgress } = options;
-    
-    try {
-      // 模拟上传进度
-      let percent = 0;
-      const timer = setInterval(() => {
-        percent += 10;
-        onProgress({ percent });
-        if (percent >= 100) {
-          clearInterval(timer);
-        }
-      }, 100);
-
-      // 模拟上传API调用
-      const randomImageUrls = [
-        'https://images.unsplash.com/photo-1544919982-b61976f0ba43?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      ];
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const randomUrl = randomImageUrls[Math.floor(Math.random() * randomImageUrls.length)];
-      
-      onSuccess({
-        url: randomUrl,
-        name: file.name
-      });
-    } catch (error) {
-      onError(error);
-    }
-  };
 
   // 上传按钮
   const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
+    <div>
       <PlusOutlined />
-      <div style={{ marginTop: 8 }}>上传图片</div>
-    </button>
+      <div style={{ marginTop: 8 }}>上传</div>
+    </div>
   );
-
-  // 删除图片确认
-  const handleRemove = (file: UploadFile) => {
-    return new Promise<boolean>((resolve) => {
-      Modal.confirm({
-        title: '确认删除',
-        content: `您确定要删除图片"${file.name}"吗？`,
-        okType: 'danger',
-        onOk: () => {
-          message.success('删除成功');
-          resolve(true);
-        },
-        onCancel: () => {
-          resolve(false);
-        },
-      });
-    });
-  };
-
-  // 删除图片处理函数
-  const handleDeleteImage = (image: any) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: `您确定要删除图片"${image.filename}"吗？`,
-      okType: 'danger',
-      onOk: () => {
-        const updatedImages = images.filter(img => img.id !== image.id);
-        setImages(updatedImages);
-        message.success('删除成功');
-      },
-    });
-  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -323,24 +165,6 @@ export const VenueDetail: React.FC = () => {
   const formatArea = (area?: number) => {
     if (!area) return '-';
     return `${area.toLocaleString()} 万平方米`;
-  };
-
-  const uploadProps = {
-    name: 'image',
-    multiple: true,
-    accept: 'image/*',
-    showUploadList: false,
-    beforeUpload: beforeUpload,
-    customRequest: customRequest,
-  };
-
-  const draggerProps = {
-    name: 'image',
-    multiple: true,
-    accept: 'image/*',
-    showUploadList: false,
-    beforeUpload: beforeUpload,
-    customRequest: customRequest,
   };
 
   if (loading) {
@@ -649,164 +473,27 @@ export const VenueDetail: React.FC = () => {
       <Card 
         title={<><PictureOutlined /> 图片管理</>}
         className="shadow-sm"
-        extra={
-          <Space>
-            <Text type="secondary">
-              共 {images.length} 张图片
-            </Text>
-          </Space>
-        }
       >
-        {/* 网格展示已有图片和上传区域 */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {/* 上传卡片 - 总是显示在第一个位置 */}
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-            <Upload
-              {...uploadProps}
-              className="h-full w-full"
-              showUploadList={false}
-            >
-              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
-                <CloudUploadOutlined className="text-3xl text-gray-400 mb-2" />
-                <Text type="secondary" className="text-xs text-center px-2">
-                  点击上传
-                </Text>
-                <Text type="secondary" className="text-xs text-center px-2">
-                  或拖拽到此处
-                </Text>
-              </div>
-            </Upload>
-          </div>
-          
-          {/* 批量上传卡片 */}
-          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
-            <Upload
-              {...draggerProps}
-              className="h-full w-full"
-              showUploadList={false}
-            >
-              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
-                <UploadOutlined className="text-3xl text-gray-400 mb-2" />
-                <Text type="secondary" className="text-xs text-center px-2">
-                  批量上传
-                </Text>
-                <Text type="secondary" className="text-xs text-center px-2">
-                  支持多选
-                </Text>
-              </div>
-            </Upload>
-          </div>
-
-          {/* 已有图片展示 */}
-          {images.map((image) => (
-            <div key={image.id} className="aspect-square relative group bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all overflow-hidden">
-              <img
-                src={image.url}
-                alt={image.filename}
-                className="w-full h-full object-cover"
-              />
-              
-              {/* 遮罩层和操作按钮 */}
-              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Space>
-                  <Button
-                    type="primary"
-                    size="small"
-                    icon={<EyeOutlined />}
-                    onClick={() => {
-                      Modal.info({
-                        title: '图片预览',
-                        width: '80vw',
-                        style: { top: 20 },
-                        content: (
-                          <div className="text-center">
-                            <img 
-                              src={image.url} 
-                              alt={image.filename} 
-                              style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }} 
-                            />
-                            <div className="mt-4 text-left">
-                              <Text strong>文件名：</Text><Text>{image.filename}</Text><br/>
-                              <Text strong>大小：</Text><Text>{(image.size / 1024 / 1024).toFixed(2)} MB</Text><br/>
-                              <Text strong>上传时间：</Text><Text>{dayjs(image.uploadedAt).format('YYYY-MM-DD HH:mm:ss')}</Text>
-                            </div>
-                          </div>
-                        ),
-                        okText: '关闭',
-                      });
-                    }}
-                    ghost
-                  />
-                  <Button
-                    type="primary"
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteImage(image)}
-                    ghost
-                  />
-                </Space>
-              </div>
-              
-              {/* 主图标识 */}
-              {image.isMain && (
-                <div className="absolute top-2 left-2">
-                  <Tag color="gold" size="small" className="text-xs">主图</Tag>
-                </div>
-              )}
-              
-              {/* 图片信息 */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
-                <Text 
-                  ellipsis={{ tooltip: image.filename }} 
-                  className="text-white text-xs block"
-                >
-                  {image.filename}
-                </Text>
-                <div className="flex justify-between items-center mt-1">
-                  <Text className="text-white text-xs opacity-80">
-                    {(image.size / 1024 / 1024).toFixed(1)}MB
-                  </Text>
-                  <Button 
-                    type="link" 
-                    size="small" 
-                    className="text-white opacity-80 hover:opacity-100 p-0 h-auto"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const updatedImages = images.map(img => ({
-                        ...img,
-                        isMain: img.id === image.id
-                      }));
-                      setImages(updatedImages);
-                      message.success('已设为主图');
-                    }}
-                    disabled={image.isMain}
-                  >
-                    <span className="text-xs">{image.isMain ? '主图' : '设为主图'}</span>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* 空状态 */}
-        {images.length === 0 && (
-          <div className="text-center py-8 mt-4">
-            <PictureOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
-            <Text type="secondary" className="block mt-4">
-              暂无场馆图片，点击上方上传按钮添加图片
-            </Text>
-          </div>
+        <Upload
+          action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+          listType="picture-card"
+          fileList={fileList}
+          onPreview={handlePreview}
+          onChange={handleChange}
+        >
+          {fileList.length >= 8 ? null : uploadButton}
+        </Upload>
+        {previewImage && (
+          <Image
+            wrapperStyle={{ display: 'none' }}
+            preview={{
+              visible: previewOpen,
+              onVisibleChange: (visible) => setPreviewOpen(visible),
+              afterOpenChange: (visible) => !visible && setPreviewImage(''),
+            }}
+            src={previewImage}
+          />
         )}
-        
-        {/* 上传说明 */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <Text type="secondary" className="text-sm">
-            <InfoCircleOutlined className="mr-2 text-blue-500" />
-            支持 JPG、PNG、GIF 格式，单个文件不超过 10MB。支持单张上传和批量上传。
-          </Text>
-        </div>
       </Card>
     </div>
   );
