@@ -30,6 +30,9 @@ const { Option } = Select;
 export const VenueList: React.FC = () => {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [searchText, setSearchText] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -37,18 +40,20 @@ export const VenueList: React.FC = () => {
 
   useEffect(() => {
     fetchVenues();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const fetchVenues = async () => {
     setLoading(true);
     try {
       const response = await venuesAPI.getVenues({
-        page: 1,
-        pageSize: 50,
+        page: currentPage,
+        pageSize: pageSize,
+        search: searchText,
         region: selectedRegion !== 'all' ? selectedRegion : undefined,
         category: selectedCategory !== 'all' ? selectedCategory : undefined,
       });
       setVenues(response.data);
+      setTotal(response.total);
     } catch (error) {
       message.error('获取场馆列表失败');
     } finally {
@@ -57,21 +62,16 @@ export const VenueList: React.FC = () => {
   };
 
   const handleSearch = () => {
+    setCurrentPage(1); // 重置到第一页
     fetchVenues();
   };
 
-  const filteredVenues = venues.filter(venue => {
-    const matchesSearch = !searchText || 
-      venue.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      venue.chinese_name?.toLowerCase().includes(searchText.toLowerCase()) ||
-      venue.city?.toLowerCase().includes(searchText.toLowerCase()) ||
-      venue.country?.toLowerCase().includes(searchText.toLowerCase());
-    
-    const matchesRegion = selectedRegion === 'all' || venue.region === selectedRegion;
-    const matchesCategory = selectedCategory === 'all' || venue.category === selectedCategory;
-    
-    return matchesSearch && matchesRegion && matchesCategory;
-  });
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    if (size !== pageSize) {
+      setPageSize(size);
+    }
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -226,7 +226,7 @@ export const VenueList: React.FC = () => {
         <Col>
           <h2 className="text-xl font-semibold">全球场馆数据库</h2>
           <p className="text-gray-500 mt-1">
-            共收录 {filteredVenues.length} 个场馆信息
+            共收录 {total} 个场馆信息
           </p>
         </Col>
       </Row>
@@ -278,17 +278,21 @@ export const VenueList: React.FC = () => {
 
       <Table
         columns={columns}
-        dataSource={filteredVenues}
+        dataSource={venues}
         rowKey="id"
         loading={loading}
         scroll={{ x: 1200 }}
         pagination={{
-          total: filteredVenues.length,
-          pageSize: 20,
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
             `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+          onChange: handlePageChange,
+          onShowSizeChange: handlePageChange,
+          pageSizeOptions: ['10', '20', '50', '100'],
         }}
         size="small"
       />
