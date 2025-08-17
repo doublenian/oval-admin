@@ -11,6 +11,9 @@ import {
   Spin,
   message,
   Empty,
+  Upload,
+  Modal,
+  Image,
   Divider,
   Badge,
 } from 'antd';
@@ -26,23 +29,32 @@ import {
   InfoCircleOutlined,
   TrophyOutlined,
   SettingOutlined,
+  UploadOutlined,
+  CloudUploadOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Venue } from '../../types';
+import { Venue, CourtImage } from '../../types';
 import { venuesAPI } from '../../services/api';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
+const { Dragger } = Upload;
 
 export const VenueDetail: React.FC = () => {
   const { venueId } = useParams<{ venueId: string }>();
   const navigate = useNavigate();
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [images, setImages] = useState<CourtImage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (venueId) {
       fetchVenueDetail();
+      fetchVenueImages();
     }
   }, [venueId]);
 
@@ -56,6 +68,99 @@ export const VenueDetail: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchVenueImages = async () => {
+    try {
+      // 模拟场馆图片数据
+      const mockImages: CourtImage[] = [
+        {
+          id: '1',
+          courtId: venueId!,
+          url: 'https://images.pexels.com/photos/1263349/pexels-photo-1263349.jpeg?auto=compress&cs=tinysrgb&w=800',
+          filename: 'venue-exterior.jpg',
+          size: 1024000,
+          uploadedAt: '2024-01-01T00:00:00.000Z',
+          isMain: true,
+        },
+        {
+          id: '2',
+          courtId: venueId!,
+          url: 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=800',
+          filename: 'venue-interior.jpg',
+          size: 2048000,
+          uploadedAt: '2024-01-02T00:00:00.000Z',
+        },
+        {
+          id: '3',
+          courtId: venueId!,
+          url: 'https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg?auto=compress&cs=tinysrgb&w=800',
+          filename: 'venue-aerial.jpg',
+          size: 1500000,
+          uploadedAt: '2024-01-03T00:00:00.000Z',
+        },
+      ];
+      setImages(mockImages);
+    } catch (error) {
+      message.error('获取场馆图片失败');
+    }
+  };
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      // 模拟上传
+      const newImage: CourtImage = {
+        id: Date.now().toString(),
+        courtId: venueId!,
+        url: URL.createObjectURL(file),
+        filename: file.name,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      };
+      setImages([...images, newImage]);
+      message.success('图片上传成功');
+    } catch (error) {
+      message.error('图片上传失败');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleBulkUpload = async (files: File[]) => {
+    setUploading(true);
+    try {
+      const newImages: CourtImage[] = files.map(file => ({
+        id: Date.now().toString() + Math.random().toString(),
+        courtId: venueId!,
+        url: URL.createObjectURL(file),
+        filename: file.name,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      }));
+      setImages([...images, ...newImages]);
+      message.success(`成功上传 ${files.length} 张图片`);
+    } catch (error) {
+      message.error('批量上传失败');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteImage = (image: CourtImage) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `您确定要删除图片"${image.filename}"吗？`,
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          setImages(images.filter(img => img.id !== image.id));
+          message.success('删除成功');
+        } catch (error) {
+          message.error('删除失败');
+        }
+      },
+    });
   };
 
   const getCategoryColor = (category: string) => {
@@ -87,6 +192,56 @@ export const VenueDetail: React.FC = () => {
   const formatArea = (area?: number) => {
     if (!area) return '-';
     return `${area.toLocaleString()} 万平方米`;
+  };
+
+  const uploadProps = {
+    name: 'image',
+    multiple: true,
+    accept: 'image/*',
+    showUploadList: false,
+    beforeUpload: (file: File, fileList: File[]) => {
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        message.error('只能上传图片文件!');
+        return false;
+      }
+      const isLt10M = file.size / 1024 / 1024 < 10;
+      if (!isLt10M) {
+        message.error('图片大小不能超过 10MB!');
+        return false;
+      }
+      
+      // 如果是多选，批量上传
+      if (fileList.length > 1) {
+        handleBulkUpload(fileList);
+      } else {
+        handleUpload(file);
+      }
+      return false;
+    },
+  };
+
+  const draggerProps = {
+    name: 'images',
+    multiple: true,
+    accept: 'image/*',
+    showUploadList: false,
+    beforeUpload: (file: File, fileList: File[]) => {
+      const validFiles = fileList.filter(f => {
+        const isImage = f.type.startsWith('image/');
+        const isLt10M = f.size / 1024 / 1024 < 10;
+        return isImage && isLt10M;
+      });
+      
+      if (validFiles.length !== fileList.length) {
+        message.error('部分文件格式不支持或文件过大');
+      }
+      
+      if (validFiles.length > 0) {
+        handleBulkUpload(validFiles);
+      }
+      return false;
+    },
   };
 
   if (loading) {
@@ -390,6 +545,98 @@ export const VenueDetail: React.FC = () => {
           )}
         </Col>
       </Row>
+
+      {/* 场馆图片管理 */}
+      <Card 
+        title={<><PictureOutlined /> 场馆图片 ({images.length})</>}
+        className="shadow-sm"
+        extra={
+          <Space>
+            <Upload {...uploadProps}>
+              <Button 
+                icon={<UploadOutlined />} 
+                loading={uploading}
+              >
+                单张上传
+              </Button>
+            </Upload>
+          </Space>
+        }
+      >
+        {/* 批量上传区域 */}
+        <Dragger {...draggerProps} className="mb-6">
+          <p className="ant-upload-drag-icon">
+            <CloudUploadOutlined />
+          </p>
+          <p className="ant-upload-text">点击或拖拽文件到此区域批量上传</p>
+          <p className="ant-upload-hint">
+            支持单个或批量上传。支持 JPG、PNG、GIF 等格式，单个文件不超过 10MB
+          </p>
+        </Dragger>
+
+        {/* 图片展示 */}
+        {images.length === 0 ? (
+          <Empty 
+            description="暂无图片"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {images.map((image) => (
+              <div key={image.id} className="relative group">
+                <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden">
+                  <Image
+                    src={image.url}
+                    alt={image.filename}
+                    className="object-cover w-full h-full"
+                    preview={{
+                      mask: (
+                        <div className="text-center text-white">
+                          <EyeOutlined />
+                          <br />
+                          预览
+                        </div>
+                      ),
+                    }}
+                  />
+                </div>
+                
+                {/* 图片信息和操作 */}
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    type="primary"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDeleteImage(image)}
+                    className="shadow-lg"
+                  />
+                </div>
+                
+                <div className="mt-2">
+                  <Text 
+                    ellipsis={{ tooltip: image.filename }} 
+                    className="block text-sm font-medium text-gray-900"
+                  >
+                    {image.filename}
+                  </Text>
+                  <div className="flex justify-between items-center mt-1">
+                    <Text type="secondary" className="text-xs">
+                      {(image.size / 1024 / 1024).toFixed(2)} MB
+                    </Text>
+                    {image.isMain && (
+                      <Tag color="gold" size="small">主图</Tag>
+                    )}
+                  </div>
+                  <Text type="secondary" className="text-xs">
+                    {dayjs(image.uploadedAt).format('YYYY-MM-DD')}
+                  </Text>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
