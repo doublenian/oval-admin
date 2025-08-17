@@ -393,17 +393,17 @@ export const VenueDetail: React.FC = () => {
       </Card>
 
       <Row gutter={[24, 24]}>
-        {/* 左侧主要信息 */}
-        <Col xs={24} lg={16}>
+        {/* 主要信息 */}
+        <Col xs={24}>
           {/* 基本信息 */}
           <Card 
             title={<><InfoCircleOutlined /> 基本信息</>}
             className="mb-6 shadow-sm"
           >
-            <Descriptions column={2} size="middle" bordered>
+            <Descriptions column={3} size="middle" bordered>
               <Descriptions.Item 
                 label={<><EnvironmentOutlined /> 完整位置</>}
-                span={2}
+                span={3}
               >
                 <Space wrap>
                   <Tag color="blue">{venue.region}</Tag>
@@ -427,9 +427,13 @@ export const VenueDetail: React.FC = () => {
                 </Space>
               </Descriptions.Item>
               
+              <Descriptions.Item label="GA层级">
+                {venue.ga_tier || '-'}
+              </Descriptions.Item>
+              
               <Descriptions.Item 
                 label={<><BuildOutlined /> 建筑师</>}
-                span={2}
+                span={3}
               >
                 <Text className="text-base">{venue.architect || '-'}</Text>
               </Descriptions.Item>
@@ -438,179 +442,141 @@ export const VenueDetail: React.FC = () => {
                 {venue.venue_type || '-'}
               </Descriptions.Item>
               
-              <Descriptions.Item label="GA层级">
-                {venue.ga_tier || '-'}
-              </Descriptions.Item>
-              
               {venue.stand_contour && (
                 <Descriptions.Item label="看台轮廓" span={2}>
                   {venue.stand_contour}
                 </Descriptions.Item>
               )}
+              
+              {/* 技术规格 */}
+              {venue.height && (
+                <Descriptions.Item label={<><VerticalAlignMiddleOutlined /> 高度</>}>
+                  <Text strong>{venue.height} 米</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.total_area && (
+                <Descriptions.Item label="总面积">
+                  <Text strong>{formatArea(venue.total_area)}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.building_size && (
+                <Descriptions.Item label="建筑尺寸">
+                  <Text>{venue.building_size}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.fop && (
+                <Descriptions.Item label="场地尺寸(FOP)" span={2}>
+                  <Text>{venue.fop}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.screen_area && (
+                <Descriptions.Item label="屏幕面积">
+                  <Text>{venue.screen_area}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.temperature_capacity && (
+                <Descriptions.Item label="温控容量">
+                  <Text>{formatCapacity(venue.temperature_capacity)} 人</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.construction_code && (
+                <Descriptions.Item label="建设代码">
+                  <Text code>{venue.construction_code}</Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.main_color_code && (
+                <Descriptions.Item label="主色调" span={2}>
+                  <Space>
+                    <div 
+                      className="w-4 h-4 rounded border"
+                      style={{ backgroundColor: venue.main_color_code }}
+                    />
+                    <Text code>{venue.main_color_code}</Text>
+                  </Space>
+                </Descriptions.Item>
+              )}
+              
+              {/* 容量详情 */}
+              {venue.vip_capacity && (
+                <Descriptions.Item label="VIP 席位">
+                  <Text strong className="text-purple-600">
+                    {formatCapacity(venue.vip_capacity)} 人
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.hospitality_capacity && (
+                <Descriptions.Item label="接待席位">
+                  <Text strong className="text-green-600">
+                    {formatCapacity(venue.hospitality_capacity)} 人
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.press_capacity && (
+                <Descriptions.Item label="媒体席位">
+                  <Text strong className="text-orange-600">
+                    {formatCapacity(venue.press_capacity)} 人
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.disabled_capacity && (
+                <Descriptions.Item label="无障碍席位">
+                  <Text strong className="text-cyan-600">
+                    {formatCapacity(venue.disabled_capacity)} 人
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {venue.suites_count && (
+                <Descriptions.Item label="豪华套房">
+                  <Text strong className="text-red-600">
+                    {venue.suites_count} 间
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {/* 投资信息 */}
+              {venue.construction_cost && (
+                <Descriptions.Item label={<><DollarOutlined /> 建设成本</>} span={2}>
+                  <Text className="text-xl font-bold text-green-600">
+                    {venue.construction_cost}
+                  </Text>
+                </Descriptions.Item>
+              )}
+              
+              {/* 系统信息 */}
+              <Descriptions.Item label="创建时间">
+                {venue.created_at ? dayjs(venue.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+              </Descriptions.Item>
+              
+              <Descriptions.Item label="更新时间" span={2}>
+                {venue.updated_at ? dayjs(venue.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+              </Descriptions.Item>
             </Descriptions>
-          </Card>
-
-          {/* 技术规格 */}
-          <Card 
-            title={<><SettingOutlined /> 技术规格</>}
-            className="mb-6 shadow-sm"
-          >
-            <Row gutter={[16, 16]}>
-              <Col xs={24} md={12}>
-                <Descriptions column={1} size="small" bordered>
-                  {venue.height && (
-                    <Descriptions.Item label={<><VerticalAlignMiddleOutlined /> 高度</>}>
-                      <Text strong>{venue.height} 米</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.total_area && (
-                    <Descriptions.Item label="总面积">
-                      <Text strong>{formatArea(venue.total_area)}</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.building_size && (
-                    <Descriptions.Item label="建筑尺寸">
-                      <Text>{venue.building_size}</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.fop && (
-                    <Descriptions.Item label="场地尺寸(FOP)">
-                      <Text>{venue.fop}</Text>
-                    </Descriptions.Item>
-                  )}
-                </Descriptions>
-              </Col>
-              <Col xs={24} md={12}>
-                <Descriptions column={1} size="small" bordered>
-                  {venue.screen_area && (
-                    <Descriptions.Item label="屏幕面积">
-                      <Text>{venue.screen_area}</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.temperature_capacity && (
-                    <Descriptions.Item label="温控容量">
-                      <Text>{formatCapacity(venue.temperature_capacity)} 人</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.construction_code && (
-                    <Descriptions.Item label="建设代码">
-                      <Text code>{venue.construction_code}</Text>
-                    </Descriptions.Item>
-                  )}
-                  {venue.main_color_code && (
-                    <Descriptions.Item label="主色调">
-                      <Space>
-                        <div 
-                          className="w-4 h-4 rounded border"
-                          style={{ backgroundColor: venue.main_color_code }}
-                        />
-                        <Text code>{venue.main_color_code}</Text>
-                      </Space>
-                    </Descriptions.Item>
-                  )}
-                </Descriptions>
-              </Col>
-            </Row>
           </Card>
 
           {/* 赛事与俱乐部信息 */}
           {venue.events_clubs && (
             <Card 
               title={<><TrophyOutlined /> 赛事与俱乐部</>}
-              className="mb-6 shadow-sm"
+              className="shadow-sm mb-6"
             >
               <Paragraph className="text-base leading-relaxed">
                 {venue.events_clubs}
               </Paragraph>
             </Card>
           )}
-
-          {/* 系统信息 */}
-          <Card 
-            title="系统信息"
-            className="shadow-sm"
-          >
-            <Descriptions column={2} size="small">
-              <Descriptions.Item label="创建时间">
-                {venue.created_at ? dayjs(venue.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
-              </Descriptions.Item>
-              <Descriptions.Item label="更新时间">
-                {venue.updated_at ? dayjs(venue.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
         </Col>
 
-        {/* 右侧容量和投资信息 */}
-        <Col xs={24} lg={8}>
-          {/* 容量详情 */}
-          <Card 
-            title={<><TeamOutlined /> 容量详情</>}
-            className="mb-6 shadow-sm"
-          >
-            <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <Text type="secondary" className="block text-sm">总容量</Text>
-                <Text className="text-2xl font-bold text-blue-600">
-                  {formatCapacity(venue.capacity)} 人
-                </Text>
-              </div>
-              
-              <Descriptions column={1} size="small">
-                {venue.vip_capacity && (
-                  <Descriptions.Item label="VIP 席位">
-                    <Text strong className="text-purple-600">
-                      {formatCapacity(venue.vip_capacity)} 人
-                    </Text>
-                  </Descriptions.Item>
-                )}
-                {venue.hospitality_capacity && (
-                  <Descriptions.Item label="接待席位">
-                    <Text strong className="text-green-600">
-                      {formatCapacity(venue.hospitality_capacity)} 人
-                    </Text>
-                  </Descriptions.Item>
-                )}
-                {venue.press_capacity && (
-                  <Descriptions.Item label="媒体席位">
-                    <Text strong className="text-orange-600">
-                      {formatCapacity(venue.press_capacity)} 人
-                    </Text>
-                  </Descriptions.Item>
-                )}
-                {venue.disabled_capacity && (
-                  <Descriptions.Item label="无障碍席位">
-                    <Text strong className="text-cyan-600">
-                      {formatCapacity(venue.disabled_capacity)} 人
-                    </Text>
-                  </Descriptions.Item>
-                )}
-                {venue.suites_count && (
-                  <Descriptions.Item label="豪华套房">
-                    <Text strong className="text-red-600">
-                      {venue.suites_count} 间
-                    </Text>
-                  </Descriptions.Item>
-                )}
-              </Descriptions>
-            </div>
-          </Card>
-
-          {/* 投资信息 */}
-          {venue.construction_cost && (
-            <Card 
-              title={<><DollarOutlined /> 投资信息</>}
-              className="shadow-sm"
-            >
-              <div className="bg-green-50 p-4 rounded-lg text-center">
-                <Text type="secondary" className="block text-sm">建设成本</Text>
-                <Text className="text-xl font-bold text-green-600">
-                  {venue.construction_cost}
-                </Text>
-              </div>
-            </Card>
-          )}
-        </Col>
       </Row>
 
       {/* 图片管理 */}
