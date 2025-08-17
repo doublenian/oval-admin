@@ -36,8 +36,40 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (username: string, password: string) =>
-    api.post('/auth/login', { username, password }),
+  login: (username: string, password: string) => {
+    // 模拟登录验证
+    const demoUsers = [
+      { username: 'admin', password: '123456', role: 'admin', email: 'admin@example.com' },
+      { username: 'manager', password: '123456', role: 'admin', email: 'manager@example.com' },
+      { username: 'user', password: '123456', role: 'user', email: 'user@example.com' },
+      { username: 'demo', password: 'demo', role: 'admin', email: 'demo@example.com' },
+    ];
+    
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const user = demoUsers.find(u => u.username === username && u.password === password);
+        if (user) {
+          resolve({
+            token: 'demo_token_' + Date.now(),
+            user: {
+              id: Date.now().toString(),
+              username: user.username,
+              email: user.email,
+              role: user.role,
+            }
+          });
+        } else {
+          reject({
+            response: {
+              data: {
+                message: '用户名或密码错误'
+              }
+            }
+          });
+        }
+      }, 1000);
+    });
+  },
   getCurrentUser: (): Promise<AuthUser> => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
 };
