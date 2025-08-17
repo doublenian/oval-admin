@@ -9,6 +9,7 @@ import { Login } from './pages/Login';
 import { CourtList } from './pages/Courts/CourtList';
 import { CourtImages } from './pages/Courts/CourtImages';
 import { BulkUpload } from './pages/Courts/BulkUpload';
+import { CourtDetail } from './pages/Courts/CourtDetail';
 import { IndoorCourtList } from './pages/Courts/IndoorCourtList';
 import { IndoorCourtImages } from './pages/Courts/IndoorCourtImages';
 import { IndoorBulkUpload } from './pages/Courts/IndoorBulkUpload';
