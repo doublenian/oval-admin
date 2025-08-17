@@ -5,5 +5,4 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 // Use placeholder values if environment variables are not set
-const defaultUrl = 'https://placeholder.supabase.co';
-const defaultKey = 'placeholder-anon-key';
+
