@@ -694,6 +694,15 @@ export const VenueDetail: React.FC = () => {
                 </Descriptions.Item>
               )}
               
+              {venue.main_color_code && (
+                <Descriptions.Item label="座椅颜色编码" span={3}>
+                  <Space>
+                    <Text code>{venue.main_color_code}</Text>
+                    <Text type="secondary">({decodeColorCode(venue.main_color_code)})</Text>
+                  </Space>
+                </Descriptions.Item>
+              )}
+              
               {venue.building_size && (
                 <Descriptions.Item label="建筑尺寸" span={3}>
                   <Text>{venue.building_size}</Text>
