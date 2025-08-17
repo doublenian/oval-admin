@@ -13,6 +13,8 @@ import { IndoorCourtList } from './pages/Courts/IndoorCourtList';
 import { IndoorCourtImages } from './pages/Courts/IndoorCourtImages';
 import { IndoorBulkUpload } from './pages/Courts/IndoorBulkUpload';
 import { UserList } from './pages/Users/UserList';
+import { VenueList } from './pages/Venues/VenueList';
+import { VenueDetail } from './pages/Venues/VenueDetail';
 
 function App() {
   return (
