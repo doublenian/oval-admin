@@ -190,11 +190,12 @@ export const venuesAPI = {
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
 
+      console.log(`Fetching venues - Page: ${page}, PageSize: ${pageSize}, From: ${from}, To: ${to}`);
       let query = supabase
         .from('venues')
         .select('*', { count: 'exact' })
         .range(from, to)
-        .order('capacity', { ascending: false });
+        .order('capacity', { ascending: false, nullsLast: true });
 
       // 应用搜索筛选
       if (params?.search) {
@@ -217,11 +218,14 @@ export const venuesAPI = {
         throw error;
       }
 
+      console.log(`Retrieved ${(data || []).length} venues, Total: ${count}`);
+
       return {
         data: data || [],
         total: count || 0,
         page,
-        pageSize
+        pageSize,
+        hasMore: (count || 0) > page * pageSize
       };
     } catch (error) {
       console.error('Error fetching venues:', error);

@@ -71,6 +71,8 @@ export const VenueList: React.FC = () => {
     if (size !== pageSize) {
       setPageSize(size);
     }
+    // 滚动到页面顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const getCategoryColor = (category: string) => {
@@ -281,7 +283,7 @@ export const VenueList: React.FC = () => {
         dataSource={venues}
         rowKey="id"
         loading={loading}
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1200, y: 600 }}
         pagination={{
           current: currentPage,
           pageSize: pageSize,
@@ -289,10 +291,11 @@ export const VenueList: React.FC = () => {
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
-            `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+            `显示第 ${range[0]}-${range[1]} 条，共 ${total} 条数据`,
           onChange: handlePageChange,
           onShowSizeChange: handlePageChange,
-          pageSizeOptions: ['10', '20', '50', '100'],
+          pageSizeOptions: ['20', '50', '100', '200'],
+          position: ['bottomCenter'],
         }}
         size="small"
       />
