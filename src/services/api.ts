@@ -76,7 +76,59 @@ export const authAPI = {
 };
 
 export const courtAPI = {
-  getCourts: (params?: any): Promise<Court[]> => api.get('/courts', { params }),
+  getCourts: async (params?: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    status?: string;
+  }) => {
+    try {
+      const page = params?.page || 1;
+      const pageSize = params?.pageSize || 10;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
+        .from('venues') // 使用 venues 表作为球场数据
+        .select('*', { count: 'exact' })
+        .range(from, to)
+        .order('created_at', { ascending: false });
+
+      // 应用搜索筛选
+      if (params?.search) {
+        query = query.or(`name.ilike.%${params.search}%,chinese_name.ilike.%${params.search}%,city.ilike.%${params.search}%`);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      // 转换数据格式以匹配 Court 接口
+      const courts = (data || []).map(venue => ({
+        id: venue.id,
+        name: venue.name,
+        location: `${venue.city || ''}, ${venue.country || ''}`.trim(),
+        description: venue.chinese_name || '',
+        capacity: venue.capacity || 0,
+        status: 'active' as const,
+        createdAt: venue.created_at || new Date().toISOString(),
+        updatedAt: venue.updated_at || new Date().toISOString(),
+        images: [],
+      }));
+
+      return {
+        data: courts,
+        total: count || 0,
+        page,
+        pageSize
+      };
+    } catch (error) {
+      console.error('Error fetching courts:', error);
+      throw error;
+    }
+  },
   getCourt: (id: string): Promise<Court> => api.get(`/courts/${id}`),
   createCourt: (data: Partial<Court>): Promise<Court> => api.post('/courts', data),
   updateCourt: (id: string, data: Partial<Court>): Promise<Court> => 

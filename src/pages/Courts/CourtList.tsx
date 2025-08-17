@@ -29,42 +29,26 @@ import dayjs from 'dayjs';
 export const CourtList: React.FC = () => {
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCourts();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const fetchCourts = async () => {
     setLoading(true);
     try {
-      // 模拟数据
-      const mockCourts: Court[] = [
-        {
-          id: '1',
-          name: '中央公园球场',
-          location: '北京市朝阳区',
-          description: '设施完善的室外网球场',
-          capacity: 100,
-          status: 'active',
-          createdAt: '2024-01-01T00:00:00.000Z',
-          updatedAt: '2024-01-01T00:00:00.000Z',
-          images: [],
-        },
-        {
-          id: '2',
-          name: '奥林匹克球场',
-          location: '北京市朝阳区',
-          description: '专业级别的球场设施',
-          capacity: 200,
-          status: 'disabled',
-          createdAt: '2024-01-02T00:00:00.000Z',
-          updatedAt: '2024-01-02T00:00:00.000Z',
-          images: [],
-        },
-      ];
-      setCourts(mockCourts);
+      const response = await courtAPI.getCourts({
+        page: currentPage,
+        pageSize: pageSize,
+        search: searchText,
+      });
+      setCourts(response.data);
+      setTotal(response.total);
     } catch (error) {
       message.error('获取球场列表失败');
     } finally {
@@ -109,6 +93,18 @@ export const CourtList: React.FC = () => {
         }
       },
     });
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1); // 重置到第一页
+    fetchCourts();
+  };
+
+  const handlePageChange = (page: number, size: number) => {
+    setCurrentPage(page);
+    if (size !== pageSize) {
+      setPageSize(size);
+    }
   };
 
   const filteredCourts = courts.filter(court =>
@@ -206,6 +202,9 @@ export const CourtList: React.FC = () => {
       <Row justify="space-between" align="middle" className="mb-4">
         <Col>
           <h2 className="text-xl font-semibold">球场管理</h2>
+          <p className="text-gray-500 mt-1">
+            共收录 {total} 个球场信息
+          </p>
         </Col>
         <Col>
           <Space>
@@ -214,8 +213,12 @@ export const CourtList: React.FC = () => {
               prefix={<SearchOutlined />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
+              onPressEnter={handleSearch}
               style={{ width: 300 }}
             />
+            <Button type="default" onClick={handleSearch}>
+              搜索
+            </Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}
@@ -229,17 +232,22 @@ export const CourtList: React.FC = () => {
 
       <Table
         columns={columns}
-        dataSource={filteredCourts}
+        dataSource={courts}
         rowKey="id"
         loading={loading}
         pagination={{
-          total: filteredCourts.length,
-          pageSize: 10,
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total, range) =>
             `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+          onChange: handlePageChange,
+          onShowSizeChange: handlePageChange,
+          pageSizeOptions: ['10', '20', '50', '100'],
         }}
+        size="small"
       />
     </Card>
   );
