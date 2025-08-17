@@ -60,39 +60,183 @@ export const VenueDetail: React.FC = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([
     {
       uid: '-1',
-      name: '场馆外观全景.jpg',
+      name: '场馆外观全景1.jpg',
       status: 'done',
       url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
     {
       uid: '-2',
-      name: '场馆内部视角.jpg',
+      name: '场馆外观全景2.jpg',
       status: 'done',
       url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
     {
       uid: '-3',
-      name: '航拍俯视图.jpg',
+      name: '场馆内部视角1.jpg',
       status: 'done',
       url: 'https://images.unsplash.com/photo-1530549387789-4c1017266635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
     {
       uid: '-4',
-      name: '观众席视角.jpg',
+      name: '场馆内部视角2.jpg',
       status: 'done',
       url: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
     {
-      uid: '-uploading',
-      percent: 65,
-      name: '上传中图片.jpg',
-      status: 'uploading',
-      url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      uid: '-5',
+      name: '观众席视角1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
     {
-      uid: '-error',
-      name: '上传失败.jpg',
-      status: 'error',
+      uid: '-6',
+      name: '观众席视角2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1594736797933-d0ace586471a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-7',
+      name: '航拍俯视图1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-8',
+      name: '航拍俯视图2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-9',
+      name: '夜景照明1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-10',
+      name: '夜景照明2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-11',
+      name: '比赛现场1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-12',
+      name: '比赛现场2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1493996698904-8e1fd7a1c23b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-13',
+      name: '建筑结构1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-14',
+      name: '建筑结构2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-15',
+      name: '入口大厅1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1606107557309-4d5b4beab4a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-16',
+      name: '入口大厅2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1589482871932-cd327bef1844?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-17',
+      name: '媒体中心1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-18',
+      name: '媒体中心2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1544548222-b8f03e6b888c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-19',
+      name: 'VIP包厢1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1606107557309-4d5b4beab4a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-20',
+      name: 'VIP包厢2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-21',
+      name: '更衣室1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-22',
+      name: '更衣室2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-23',
+      name: '训练场地1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1544548222-b8f03e6b888c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-24',
+      name: '训练场地2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-25',
+      name: '停车场1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1558618047-ac8d3ac44a5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-26',
+      name: '停车场2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1558618047-ac8d3ac44a5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-27',
+      name: '周边环境1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-28',
+      name: '周边环境2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-29',
+      name: '建设施工1.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
+    },
+    {
+      uid: '-30',
+      name: '建设施工2.jpg',
+      status: 'done',
+      url: 'https://images.unsplash.com/photo-1522778119026-d647f0596c20?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80',
     },
   ]);
 
@@ -474,7 +618,7 @@ export const VenueDetail: React.FC = () => {
         title={<><PictureOutlined /> 图片管理</>}
         className="shadow-sm"
       >
-        <Upload
+        {fileList.length >= 50 ? null : uploadButton}
           action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
           listType="picture-card"
           fileList={fileList}
