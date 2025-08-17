@@ -34,7 +34,7 @@ function App() {
               <Route path="" element={<Navigate to="/courts" replace />} />
               <Route path="courts" element={<CourtList />} />
               <Route path="courts/create" element={<div>新增球场</div>} />
-              <Route path="courts/:courtId" element={<div>球场详情</div>} />
+              <Route path="courts/:courtId" element={<CourtDetail />} />
               <Route path="courts/:courtId/edit" element={<div>编辑球场</div>} />
               <Route path="courts/:courtId/images" element={<CourtImages />} />
               <Route path="courts/bulk-upload" element={<BulkUpload />} />
