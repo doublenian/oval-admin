@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 import { AuthUser, Court, CourtImage, User } from '../types';
 
 // 创建 axios 实例
@@ -124,102 +125,109 @@ export const userAPI = {
 };
 
 export const venuesAPI = {
-  getVenues: (params?: any) => {
-    // 模拟获取场馆数据
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // 这里可以根据params进行筛选和分页
-        const mockVenues = [
-          {
-            id: '1',
-            name: 'Philippine Arena',
-            chinese_name: '菲律宾竞技场',
-            category: 'B',
-            capacity: 51898,
-            country: 'Philippines',
-            city: 'Bocaue',
-            region: 'Asia',
-            built_year: 2014,
-            architect: 'POPULOUS',
-            construction_cost: '213 million USD',
-            link: 'https://en.wikipedia.org/wiki/Philippine_Arena'
-          },
-          {
-            id: '2', 
-            name: 'Mineirinho Arena',
-            chinese_name: '米尼尔尼奥竞技场',
-            category: 'S',
-            capacity: 24482,
-            country: 'Brazil',
-            city: 'Belo Horizonte',
-            region: 'South America',
-            built_year: 1980,
-            architect: null,
-            construction_cost: null,
-            link: 'https://en.wikipedia.org/wiki/Mineirinho'
-          },
-          {
-            id: '3',
-            name: 'Greensboro Coliseum Complex',
-            chinese_name: '格林斯伯罗竞技场',
-            category: 'B',
-            capacity: 23500,
-            country: 'United States',
-            city: 'Greensboro',
-            region: 'North America',
-            built_year: 1959,
-            architect: 'FABRAP',
-            construction_cost: '4.5 million USD (40.4 million USD in 2020); 63 million USD(1993 Expansion)',
-            link: 'https://www.wikiwand.com/en/Greensboro_Coliseum'
-          }
-        ];
-        resolve({
-          data: mockVenues,
-          total: mockVenues.length,
-          page: params?.page || 1,
-          pageSize: params?.pageSize || 10
-        });
-      }, 500);
+  getVenues: async (params?: {
+    page?: number;
+    pageSize?: number;
+    region?: string;
+    category?: string;
+    search?: string;
+  }) => {
+    try {
+      const page = params?.page || 1;
+      const pageSize = params?.pageSize || 20;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let query = supabase
+        .from('venues')
+        .select('*', { count: 'exact' })
+        .range(from, to)
+        .order('capacity', { ascending: false });
+
+      // 应用搜索筛选
+      if (params?.search) {
+        query = query.or(`name.ilike.%${params.search}%,chinese_name.ilike.%${params.search}%,country.ilike.%${params.search}%,city.ilike.%${params.search}%`);
+      }
+
+      // 应用区域筛选
+      if (params?.region && params.region !== 'all') {
+        query = query.eq('region', params.region);
+      }
+
+      // 应用类别筛选
+      if (params?.category && params.category !== 'all') {
+        query = query.eq('category', params.category);
+      }
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        data: data || [],
+        total: count || 0,
+        page,
+        pageSize
+      };
+    } catch (error) {
+      console.error('Error fetching venues:', error);
+      throw error;
     });
   },
-  getVenue: (id: string) => {
-    // 模拟获取单个场馆详情
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockVenue = {
-          id,
-          name: 'Philippine Arena',
-          chinese_name: '菲律宾竞技场',
-          category: 'B',
-          capacity: 51898,
-          country: 'Philippines',
-          city: 'Bocaue',
-          region: 'Asia',
-          built_year: 2014,
-          update_year: null,
-          architect: 'POPULOUS',
-          venue_type: 'P',
-          construction_cost: '213 million USD',
-          link: 'https://en.wikipedia.org/wiki/Philippine_Arena',
-          height: 65,
-          building_size: '227/179',
-          total_area: null,
-          events_clubs: null
-        };
-        resolve(mockVenue);
-      }, 300);
+  getVenue: async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('venues')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error fetching venue:', error);
+      throw error;
     });
   },
-  searchVenues: (query: string, filters?: any) => {
-    // 模拟搜索场馆
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // 这里可以实现搜索逻辑
-        resolve({
-          data: [],
-          total: 0
-        });
-      }, 300);
+  searchVenues: async (query: string, filters?: any) => {
+    try {
+      let supabaseQuery = supabase
+        .from('venues')
+        .select('*', { count: 'exact' });
+
+      // 搜索逻辑
+      if (query) {
+        supabaseQuery = supabaseQuery.or(`name.ilike.%${query}%,chinese_name.ilike.%${query}%,country.ilike.%${query}%,city.ilike.%${query}%`);
+      }
+
+      // 应用其他筛选条件
+      if (filters) {
+        if (filters.region && filters.region !== 'all') {
+          supabaseQuery = supabaseQuery.eq('region', filters.region);
+        }
+        if (filters.category && filters.category !== 'all') {
+          supabaseQuery = supabaseQuery.eq('category', filters.category);
+        }
+      }
+
+      const { data, error, count } = await supabaseQuery;
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        data: data || [],
+        total: count || 0
+      };
+    } catch (error) {
+      console.error('Error searching venues:', error);
+      throw error;
     });
   }
 };
