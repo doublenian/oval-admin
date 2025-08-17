@@ -330,66 +330,106 @@ export const VenueDetail: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* 顶部导航和标题 */}
-      <Card className="shadow-sm border-0">
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Space size="large">
+      <Card className="shadow-sm border-0" bodyStyle={{ padding: '24px 32px' }}>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* 左侧内容 */}
+          <div className="flex-1">
+            <div className="flex items-center gap-4 mb-4">
               <Button
                 icon={<ArrowLeftOutlined />}
                 onClick={() => navigate('/venues')}
-                size="large"
+                type="default"
+                className="flex-shrink-0"
               >
                 返回列表
               </Button>
+            </div>
+            
+            <div className="space-y-3">
+              {/* 场馆名称 */}
               <div>
-                <Title level={2} className="mb-2">
+                <Title level={1} className="mb-2 text-2xl lg:text-3xl font-bold text-gray-900">
                   {venue.name}
                 </Title>
                 {venue.chinese_name && (
-                  <Text type="secondary" className="text-lg block mb-3">
+                  <Text className="text-lg text-gray-600 block">
                     {venue.chinese_name}
                   </Text>
                 )}
-                <Space className="mt-3" size="middle">
-                  <Tag color="blue" className="px-3 py-1">
-                    <EnvironmentOutlined /> {venue.region}
-                  </Tag>
-                  {venue.category && (
-                    <Tag color={getCategoryColor(venue.category)} className="px-3 py-1">
-                      <TrophyOutlined /> {getCategoryName(venue.category)}
-                    </Tag>
-                  )}
-                  {venue.venue_index && (
-                    <Badge count={venue.venue_index} style={{ backgroundColor: '#52c41a' }}>
-                      <Tag className="px-3 py-1">场馆编号</Tag>
-                    </Badge>
-                  )}
-                </Space>
               </div>
-            </Space>
-          </Col>
-          <Col>
-            <Space>
+              
+              {/* 标签区域 */}
+              <div className="flex flex-wrap items-center gap-2">
+                <Tag 
+                  color="blue" 
+                  className="px-3 py-1 text-sm font-medium border-0 rounded-full"
+                  style={{ backgroundColor: '#e6f4ff', color: '#1677ff' }}
+                >
+                  <EnvironmentOutlined className="mr-1" /> {venue.region}
+                </Tag>
+                {venue.category && (
+                  <Tag 
+                    color={getCategoryColor(venue.category)} 
+                    className="px-3 py-1 text-sm font-medium border-0 rounded-full"
+                  >
+                    <TrophyOutlined className="mr-1" /> {getCategoryName(venue.category)}
+                  </Tag>
+                )}
+                {venue.venue_index && (
+                  <Badge 
+                    count={venue.venue_index} 
+                    style={{ 
+                      backgroundColor: '#52c41a',
+                      boxShadow: '0 0 0 1px #d9f7be inset'
+                    }}
+                  >
+                    <Tag className="px-3 py-1 text-sm font-medium border-0 rounded-full bg-green-50 text-green-700">
+                      场馆编号
+                    </Tag>
+                  </Badge>
+                )}
+                {venue.capacity && (
+                  <Tag className="px-3 py-1 text-sm font-medium border-0 rounded-full bg-purple-50 text-purple-700">
+                    <TeamOutlined className="mr-1" /> 
+                    {formatCapacity(venue.capacity)} 人
+                  </Tag>
+                )}
+                {venue.built_year && (
+                  <Tag className="px-3 py-1 text-sm font-medium border-0 rounded-full bg-orange-50 text-orange-700">
+                    <CalendarOutlined className="mr-1" /> 
+                    {venue.built_year}年
+                  </Tag>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* 右侧操作区域 */}
+          <div className="flex flex-col sm:flex-row gap-3 lg:flex-shrink-0">
+            <div className="flex flex-wrap gap-2">
               {venue.link && (
                 <Button
                   type="primary"
                   icon={<GlobalOutlined />}
                   onClick={() => window.open(venue.link, '_blank')}
+                  className="bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
                 >
                   官方链接
                 </Button>
               )}
               {venue.additional_link && (
                 <Button
+                  type="default"
                   icon={<GlobalOutlined />}
                   onClick={() => window.open(venue.additional_link, '_blank')}
+                  className="border-gray-300 hover:border-blue-400 hover:text-blue-600"
                 >
                   附加链接
                 </Button>
               )}
-            </Space>
-          </Col>
-        </Row>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <Row gutter={[32, 32]}>
