@@ -596,62 +596,163 @@ export const VenueDetail: React.FC = () => {
         className="shadow-sm"
         extra={
           <Space>
-            <Upload {...uploadProps}>
-              <Button 
-                icon={<UploadOutlined />} 
-                loading={uploading}
-                type="primary"
-                ghost
-              >
-                单张上传
-              </Button>
-            </Upload>
             <Text type="secondary">
               共 {images.length} 张图片
             </Text>
           </Space>
         }
       >
-        {/* 上传区域 */}
-        <Row gutter={[16, 16]} className="mb-6">
-          <Col xs={24} lg={16}>
-            <Dragger {...draggerProps} style={{ height: 120 }}>
-              <p className="ant-upload-drag-icon">
-                <CloudUploadOutlined style={{ fontSize: 32, color: '#1890ff' }} />
-              </p>
-              <p className="ant-upload-text">点击或拖拽文件到此区域批量上传</p>
-              <p className="ant-upload-hint">
-                支持 JPG、PNG、GIF 格式，单个文件不超过 10MB
-              </p>
-            </Dragger>
-          </Col>
-          <Col xs={24} lg={8}>
-            <div className="h-full flex flex-col justify-center items-center bg-gray-50 rounded-lg p-4">
-              <PictureOutlined style={{ fontSize: 24, color: '#8c8c8c' }} />
-              <Text type="secondary" className="mt-2">
-                支持格式：JPG、PNG、GIF
-              </Text>
-              <Text type="secondary">
-                最大文件：10MB
-              </Text>
-              <Text type="secondary">
-                批量上传：无限制
-              </Text>
-            </div>
-          </Col>
-        </Row>
+        {/* 网格展示已有图片和上传区域 */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {/* 上传卡片 - 总是显示在第一个位置 */}
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+            <Upload
+              {...uploadProps}
+              className="h-full w-full"
+              showUploadList={false}
+            >
+              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
+                <CloudUploadOutlined className="text-3xl text-gray-400 mb-2" />
+                <Text type="secondary" className="text-xs text-center px-2">
+                  点击上传
+                </Text>
+                <Text type="secondary" className="text-xs text-center px-2">
+                  或拖拽到此处
+                </Text>
+              </div>
+            </Upload>
+          </div>
+          
+          {/* 批量上传卡片 */}
+          <div className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors">
+            <Upload
+              {...draggerProps}
+              className="h-full w-full"
+              showUploadList={false}
+            >
+              <div className="h-full w-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 rounded-lg">
+                <UploadOutlined className="text-3xl text-gray-400 mb-2" />
+                <Text type="secondary" className="text-xs text-center px-2">
+                  批量上传
+                </Text>
+                <Text type="secondary" className="text-xs text-center px-2">
+                  支持多选
+                </Text>
+              </div>
+            </Upload>
+          </div>
 
-        <Divider orientation="left">场馆图片展示</Divider>
+          {/* 已有图片展示 */}
+          {images.map((image) => (
+            <div key={image.id} className="aspect-square relative group bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all overflow-hidden">
+              <img
+                src={image.url}
+                alt={image.filename}
+                className="w-full h-full object-cover"
+              />
+              
+              {/* 遮罩层和操作按钮 */}
+              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Space>
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<EyeOutlined />}
+                    onClick={() => {
+                      Modal.info({
+                        title: '图片预览',
+                        width: '80vw',
+                        style: { top: 20 },
+                        content: (
+                          <div className="text-center">
+                            <img 
+                              src={image.url} 
+                              alt={image.filename} 
+                              style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }} 
+                            />
+                            <div className="mt-4 text-left">
+                              <Text strong>文件名：</Text><Text>{image.filename}</Text><br/>
+                              <Text strong>大小：</Text><Text>{(image.size / 1024 / 1024).toFixed(2)} MB</Text><br/>
+                              <Text strong>上传时间：</Text><Text>{dayjs(image.uploadedAt).format('YYYY-MM-DD HH:mm:ss')}</Text>
+                            </div>
+                          </div>
+                        ),
+                        okText: '关闭',
+                      });
+                    }}
+                    ghost
+                  />
+                  <Button
+                    type="primary"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={() => handleDeleteImage(image)}
+                    ghost
+                  />
+                </Space>
+              </div>
+              
+              {/* 主图标识 */}
+              {image.isMain && (
+                <div className="absolute top-2 left-2">
+                  <Tag color="gold" size="small" className="text-xs">主图</Tag>
+                </div>
+              )}
+              
+              {/* 图片信息 */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                <Text 
+                  ellipsis={{ tooltip: image.filename }} 
+                  className="text-white text-xs block"
+                >
+                  {image.filename}
+                </Text>
+                <div className="flex justify-between items-center mt-1">
+                  <Text className="text-white text-xs opacity-80">
+                    {(image.size / 1024 / 1024).toFixed(1)}MB
+                  </Text>
+                  <Button 
+                    type="link" 
+                    size="small" 
+                    className="text-white opacity-80 hover:opacity-100 p-0 h-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const updatedImages = images.map(img => ({
+                        ...img,
+                        isMain: img.id === image.id
+                      }));
+                      setImages(updatedImages);
+                      message.success('已设为主图');
+                    }}
+                    disabled={image.isMain}
+                  >
+                    <span className="text-xs">{image.isMain ? '主图' : '设为主图'}</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
         
-        {/* 图片展示网格 */}
-        {images.length === 0 ? (
-          <Empty 
-            description="暂无图片，请上传场馆图片"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            style={{ padding: '40px 0' }}
-          />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/* 空状态 */}
+        {images.length === 0 && (
+          <div className="text-center py-8 mt-4">
+            <PictureOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />
+            <Text type="secondary" className="block mt-4">
+              暂无场馆图片，点击上方上传按钮添加图片
+            </Text>
+          </div>
+        )}
+        
+        {/* 上传说明 */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+          <Text type="secondary" className="text-sm">
+            <InfoCircleOutlined className="mr-2 text-blue-500" />
+            支持 JPG、PNG、GIF 格式，单个文件不超过 10MB。支持单张上传和批量上传。
+          </Text>
+        </div>
+      </Card>
             {images.map((image) => (
               <div key={image.id} className="relative group bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
                 <div className="aspect-w-16 aspect-h-12 bg-gray-100 rounded-t-lg overflow-hidden">
