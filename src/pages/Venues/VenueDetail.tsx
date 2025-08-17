@@ -10,6 +10,11 @@ import {
   Upload,
   Modal,
   Badge,
+  Row,
+  Col,
+  Empty,
+  message,
+  Image,
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -287,6 +292,10 @@ export const VenueDetail: React.FC = () => {
     accept: 'image/*',
     showUploadList: false,
     beforeUpload: (file: File, fileList: File[]) => {
+      return beforeUpload(file);
+    },
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
