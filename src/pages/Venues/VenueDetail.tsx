@@ -15,6 +15,7 @@ import {
   Empty,
   message,
   Image,
+  Tooltip,
 } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -321,6 +322,44 @@ export const VenueDetail: React.FC = () => {
       'D': '冰蓝转换', 'E': '电竞', 'G': '室内足球'
     };
     return type ? typeMap[type] || type : '-';
+  };
+
+  // 解码颜色并返回实际颜色值
+  const getActualColors = (code?: string) => {
+    if (!code) return [];
+
+    const colorMap: Record<string, string> = {
+      'Re': '#FF0000', // 红色
+      'Or': '#FFA500', // 橙色
+      'Ye': '#FFFF00', // 黄色
+      'Gn': '#008000', // 绿色
+      'Ch': '#00FFFF', // 青色
+      'Bl': '#0000FF', // 蓝色
+      'Pe': '#800080', // 紫色
+      'Br': '#A52A2A', // 棕色
+      'Pk': '#FFC0CB', // 粉色
+      'Bk': '#000000', // 黑色
+      'Wh': '#FFFFFF', // 白色
+      'Gy': '#808080', // 灰色
+      'Vr': '#F5F5F5', // 无座椅 (浅灰)
+      'Un': '#D3D3D3'  // 未知 (浅灰)
+    };
+
+    const parts = code.split('_');
+    const colors = parts[0];
+    
+    // 解析颜色代码
+    const colorCodes = colors.match(/.{1,2}/g) || [];
+    return colorCodes.map(c => ({
+      code: c,
+      color: colorMap[c] || '#D3D3D3',
+      name: {
+        'Re': '红色', 'Or': '橙色', 'Ye': '黄色', 'Gn': '绿色',
+        'Ch': '青色', 'Bl': '蓝色', 'Pe': '紫色', 'Br': '棕色',
+        'Pk': '粉色', 'Bk': '黑色', 'Wh': '白色', 'Gy': '灰色',
+        'Vr': '无座椅', 'Un': '未知'
+      }[c] || c
+    }));
   };
 
   // 解码颜色编码
@@ -687,18 +726,27 @@ export const VenueDetail: React.FC = () => {
               
               {venue.main_color_code && (
                 <Descriptions.Item label="座椅颜色编码" span={3}>
-                  <Space>
-                    <Text code>{venue.main_color_code}</Text>
-                    <Text type="secondary">({decodeColorCode(venue.main_color_code)})</Text>
-                  </Space>
-                </Descriptions.Item>
-              )}
-              
-              {venue.main_color_code && (
-                <Descriptions.Item label="座椅颜色编码" span={3}>
-                  <Space>
-                    <Text code>{venue.main_color_code}</Text>
-                    <Text type="secondary">({decodeColorCode(venue.main_color_code)})</Text>
+                  <Space direction="vertical" size="small">
+                    <div className="flex items-center space-x-2">
+                      <Text code>{venue.main_color_code}</Text>
+                      <Text type="secondary">({decodeColorCode(venue.main_color_code)})</Text>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Text className="text-sm text-gray-600">颜色预览:</Text>
+                      <div className="flex space-x-1">
+                        {getActualColors(venue.main_color_code).map((colorInfo, index) => (
+                          <Tooltip key={index} title={colorInfo.name}>
+                            <div 
+                              className="w-6 h-6 rounded border border-gray-300 cursor-help shadow-sm"
+                              style={{ 
+                                backgroundColor: colorInfo.color,
+                                border: colorInfo.color === '#FFFFFF' ? '1px solid #d9d9d9' : '1px solid rgba(0,0,0,0.1)'
+                              }}
+                            />
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </div>
                   </Space>
                 </Descriptions.Item>
               )}
