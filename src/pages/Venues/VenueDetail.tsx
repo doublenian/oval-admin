@@ -584,9 +584,21 @@ export const VenueDetail: React.FC = () => {
               className="shadow-sm mb-8 border-0"
               bodyStyle={{ padding: '32px' }}
             >
-              <Paragraph className="text-base leading-relaxed mb-0">
-                {venue.events_clubs}
-              </Paragraph>
+              <Space wrap size="middle">
+                {venue.events_clubs
+                  .split(';')
+                  .filter(item => item.trim())
+                  .map((item, index) => (
+                    <Tag 
+                      key={index} 
+                      color="blue" 
+                      className="px-3 py-2 text-sm"
+                    >
+                      {item.trim()}
+                    </Tag>
+                  ))
+                }
+              </Space>
             </Card>
           )}
         </Col>
