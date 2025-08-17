@@ -174,7 +174,7 @@ export const venuesAPI = {
     } catch (error) {
       console.error('Error fetching venues:', error);
       throw error;
-    });
+    }
   },
   getVenue: async (id: string) => {
     try {
@@ -192,7 +192,7 @@ export const venuesAPI = {
     } catch (error) {
       console.error('Error fetching venue:', error);
       throw error;
-    });
+    }
   },
   searchVenues: async (query: string, filters?: any) => {
     try {
@@ -228,7 +228,7 @@ export const venuesAPI = {
     } catch (error) {
       console.error('Error searching venues:', error);
       throw error;
-    });
+    }
   }
 };
 
