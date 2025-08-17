@@ -589,15 +589,7 @@ export const VenueDetail: React.FC = () => {
                     src={image.url}
                     alt={image.filename}
                     className="object-cover w-full h-full"
-                    preview={{
-                      mask: (
-                        <div className="text-center text-white">
-                          <EyeOutlined />
-                          <br />
-                          预览
-                        </div>
-                      ),
-                    }}
+                    preview={false}
                   />
                 </div>
                 
