@@ -347,14 +347,40 @@ export const VenueDetail: React.FC = () => {
             
             <div className="space-y-3">
               {/* 场馆名称 */}
-              <div>
+              <div className="space-y-2">
                 <Title level={1} className="mb-2 text-2xl lg:text-3xl font-bold text-gray-900">
                   {venue.name}
                 </Title>
                 {venue.chinese_name && (
-                  <Text className="text-lg text-gray-600 block">
-                    {venue.chinese_name}
-                  </Text>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <Text className="text-lg text-gray-600">
+                      {venue.chinese_name}
+                    </Text>
+                    <div className="flex flex-wrap gap-2 sm:ml-auto">
+                      {venue.link && (
+                        <Button
+                          type="primary"
+                          size="small"
+                          icon={<GlobalOutlined />}
+                          onClick={() => window.open(venue.link, '_blank')}
+                          className="bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
+                        >
+                          官方链接
+                        </Button>
+                      )}
+                      {venue.additional_link && (
+                        <Button
+                          type="default"
+                          size="small"
+                          icon={<GlobalOutlined />}
+                          onClick={() => window.open(venue.additional_link, '_blank')}
+                          className="border-gray-300 hover:border-blue-400 hover:text-blue-600"
+                        >
+                          附加链接
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
               
@@ -405,30 +431,6 @@ export const VenueDetail: React.FC = () => {
           </div>
           
           {/* 右侧操作区域 */}
-          <div className="flex flex-col sm:flex-row gap-3 lg:flex-shrink-0">
-            <div className="flex flex-wrap gap-2">
-              {venue.link && (
-                <Button
-                  type="primary"
-                  icon={<GlobalOutlined />}
-                  onClick={() => window.open(venue.link, '_blank')}
-                  className="bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
-                >
-                  官方链接
-                </Button>
-              )}
-              {venue.additional_link && (
-                <Button
-                  type="default"
-                  icon={<GlobalOutlined />}
-                  onClick={() => window.open(venue.additional_link, '_blank')}
-                  className="border-gray-300 hover:border-blue-400 hover:text-blue-600"
-                >
-                  附加链接
-                </Button>
-              )}
-            </div>
-          </div>
         </div>
       </Card>
 
