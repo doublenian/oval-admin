@@ -328,9 +328,9 @@ export const VenueDetail: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* 顶部导航和标题 */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm border-0">
         <Row justify="space-between" align="middle">
           <Col>
             <Space size="large">
@@ -346,11 +346,11 @@ export const VenueDetail: React.FC = () => {
                   {venue.name}
                 </Title>
                 {venue.chinese_name && (
-                  <Text type="secondary" className="text-lg block">
+                  <Text type="secondary" className="text-lg block mb-3">
                     {venue.chinese_name}
                   </Text>
                 )}
-                <Space className="mt-2">
+                <Space className="mt-3" size="middle">
                   <Tag color="blue" className="px-3 py-1">
                     <EnvironmentOutlined /> {venue.region}
                   </Tag>
@@ -392,20 +392,33 @@ export const VenueDetail: React.FC = () => {
         </Row>
       </Card>
 
-      <Row gutter={[24, 24]}>
+      <Row gutter={[32, 32]}>
         {/* 主要信息 */}
         <Col xs={24}>
           {/* 基本信息 */}
           <Card 
             title={<><InfoCircleOutlined /> 基本信息</>}
-            className="mb-6 shadow-sm"
+            className="mb-8 shadow-sm border-0"
+            bodyStyle={{ padding: '32px' }}
           >
-            <Descriptions column={3} size="middle" bordered>
+            <Descriptions 
+              column={{ xs: 1, sm: 2, md: 3 }} 
+              size="middle" 
+              bordered
+              labelStyle={{ 
+                background: '#fafafa', 
+                fontWeight: '500',
+                padding: '16px'
+              }}
+              contentStyle={{ 
+                padding: '16px'
+              }}
+            >
               <Descriptions.Item 
                 label={<><EnvironmentOutlined /> 完整位置</>}
                 span={3}
               >
-                <Space wrap>
+                <Space wrap size="middle">
                   <Tag color="blue">{venue.region}</Tag>
                   <Text strong>{venue.country}</Text>
                   {venue.city && <Text type="secondary">{venue.city}</Text>}
@@ -419,7 +432,7 @@ export const VenueDetail: React.FC = () => {
               </Descriptions.Item>
               
               <Descriptions.Item label={<><CalendarOutlined /> 建成年份</>}>
-                <Space>
+                <Space size="small">
                   <Text strong>{venue.built_year || '-'}</Text>
                   {venue.update_year && (
                     <Text type="secondary">(更新: {venue.update_year})</Text>
@@ -435,7 +448,7 @@ export const VenueDetail: React.FC = () => {
                 label={<><BuildOutlined /> 建筑师</>}
                 span={3}
               >
-                <Text className="text-base">{venue.architect || '-'}</Text>
+                <Text className="text-base font-medium">{venue.architect || '-'}</Text>
               </Descriptions.Item>
               
               <Descriptions.Item label="场馆类型">
@@ -493,7 +506,7 @@ export const VenueDetail: React.FC = () => {
               
               {venue.main_color_code && (
                 <Descriptions.Item label="主色调" span={2}>
-                  <Space>
+                  <Space size="small">
                     <div 
                       className="w-4 h-4 rounded border"
                       style={{ backgroundColor: venue.main_color_code }}
@@ -546,8 +559,8 @@ export const VenueDetail: React.FC = () => {
               
               {/* 投资信息 */}
               {venue.construction_cost && (
-                <Descriptions.Item label={<><DollarOutlined /> 建设成本</>} span={2}>
-                  <Text className="text-xl font-bold text-green-600">
+                <Descriptions.Item label={<><DollarOutlined /> 建设成本</>} span={3}>
+                  <Text className="text-lg font-bold text-green-600">
                     {venue.construction_cost}
                   </Text>
                 </Descriptions.Item>
@@ -568,9 +581,10 @@ export const VenueDetail: React.FC = () => {
           {venue.events_clubs && (
             <Card 
               title={<><TrophyOutlined /> 赛事与俱乐部</>}
-              className="shadow-sm mb-6"
+              className="shadow-sm mb-8 border-0"
+              bodyStyle={{ padding: '32px' }}
             >
-              <Paragraph className="text-base leading-relaxed">
+              <Paragraph className="text-base leading-relaxed mb-0">
                 {venue.events_clubs}
               </Paragraph>
             </Card>
@@ -582,7 +596,8 @@ export const VenueDetail: React.FC = () => {
       {/* 图片管理 */}
       <Card 
         title={<><PictureOutlined /> 图片管理</>}
-        className="shadow-sm"
+        className="shadow-sm border-0"
+        bodyStyle={{ padding: '32px' }}
       >
         <Upload
           action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
@@ -590,6 +605,7 @@ export const VenueDetail: React.FC = () => {
           fileList={fileList}
           onPreview={handlePreview}
           onChange={handleChange}
+          className="venue-image-upload"
         >
           {fileList.length >= 50 ? null : uploadButton}
         </Upload>
